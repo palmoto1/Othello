@@ -1,0 +1,18 @@
+# Default ignored files
+
+*.iml
+*.xml
+*.class
+
+/shelf/
+
+# Datasource local storage ignored files
+/../../../../../:\Users\augus\Othello\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+
+
+/out/.gitignore
+/.idea/.gitignore
+*.class
