@@ -3,19 +3,21 @@ import java.util.*;
 public class Board {
 
     private final static int SIZE = 8;
-    private final static int PLAYER = 1;
+    private final static int TOTAL_CELLS = 64;
+    private final static int HUMAN = 1;
     private final static int AI = 2;
     private final int[][] boardGrid;
-    private int turn;
+
+    private int currentPlayer;
+
 
     public Board() {
         boardGrid = new int[SIZE][SIZE];
         initializeBoard();
-        turn = AI;
-
+        currentPlayer = AI;
     }
 
-    public void initializeBoard() {
+    private void initializeBoard() {
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++)
                 boardGrid[i][j] = 0;
@@ -23,51 +25,81 @@ public class Board {
         boardGrid[3][3] = 1;
         boardGrid[3][4] = 2;
         boardGrid[4][3] = 2;
-        boardGrid[4][4] = 1 ;
+        boardGrid[4][4] = 1;
 
+    }
+
+    public int getPoints(int player){
+        if (player == HUMAN || player == AI)
+            return countDiscs(player);
+        throw new IllegalArgumentException();
+    }
+
+    public int getTotalDiscs(){
+        return TOTAL_CELLS - countDiscs(0);
+    }
+
+    public List<Cell> validMoves(int player){
+        ArrayList<Cell> cells = new ArrayList<>();
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++)
+                if (!wonDiscs(i, j).isEmpty())
+                    cells.add(new Cell(i, j));
+        }
+        return cells;
+    }
+
+    public boolean hasMoves(int player){
+        return !validMoves(player).isEmpty();
     }
 
     public void makeMove(int x, int y) {
-        if (!validCell(x, y))
-            return;
-
-        boardGrid[x][y] = turn;
-        flipDiscs(getAffectedDiscs(x, y));
-        changeTurn();
-
-
+        if (isValidMove(x, y)) {
+            List<Disc> wonDiscs = wonDiscs(x, y);
+            if (!wonDiscs.isEmpty()) {
+                boardGrid[x][y] = currentPlayer;
+                flipDiscs(wonDiscs);
+                changeTurn();
+            }
+        }
     }
 
+    private int countDiscs(int player){
+        int count = 0;
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++)
+                if (boardGrid[i][j] == player)
+                    count++;
+        }
+        return count;
+    }
 
-    public void flipDiscs(List<Disc> affectedDiscs) {
-        for (Disc d : affectedDiscs) {
+    private void flipDiscs(List<Disc> discs) {
+        for (Disc d : discs) {
             d.flip();
             boardGrid[d.x()][d.y()] = d.color();
         }
 
-
     }
 
-    public boolean validCell(int x, int y) {
-        return boardGrid[x][y] == 0 && cellInsideBoard(x, y) &&
-                !getAffectedDiscs(x, y).isEmpty();
+    private boolean isValidMove(int x, int y) {
+        return cellIsEmpty(x, y) && cellExists(x, y);
     }
 
 
     // really ugly, find solution for duplicates if you can
-    public List<Disc> getAffectedDiscs(int x, int y) {
+    private List<Disc> wonDiscs(int x, int y) {
         List<Disc> discs = new ArrayList<>();
         List<Disc> temp = new ArrayList<>();
         // check left
         int i = y - 1;
         while (i >= 0) {
-            if (boardGrid[x][i] != 0 && boardGrid[x][i] != turn)
+            if (boardGrid[x][i] != 0 && boardGrid[x][i] != currentPlayer)
                 temp.add(new Disc(x, i, boardGrid[x][i]));
             else {
-                if (boardGrid[x][i] == turn) {
+                if (boardGrid[x][i] == currentPlayer)
                     discs.addAll(temp);
-                    temp.clear();
-                }
+                temp.clear();
                 break;
             }
             i--;
@@ -75,13 +107,12 @@ public class Board {
         // check right
         i = y + 1;
         while (i < SIZE) {
-            if (boardGrid[x][i] != 0 && boardGrid[x][i] != turn)
+            if (boardGrid[x][i] != 0 && boardGrid[x][i] != currentPlayer)
                 temp.add(new Disc(x, i, boardGrid[x][i]));
             else {
-                if (boardGrid[x][i] == turn) {
+                if (boardGrid[x][i] == currentPlayer)
                     discs.addAll(temp);
-                    temp.clear();
-                }
+                temp.clear();
                 break;
 
             }
@@ -90,13 +121,12 @@ public class Board {
         // check up
         i = x - 1;
         while (i >= 0) {
-            if (boardGrid[i][y] != 0 && boardGrid[i][y] != turn)
+            if (boardGrid[i][y] != 0 && boardGrid[i][y] != currentPlayer)
                 temp.add(new Disc(i, y, boardGrid[i][y]));
             else {
-                if (boardGrid[i][y] == turn) {
+                if (boardGrid[i][y] == currentPlayer)
                     discs.addAll(temp);
-                    temp.clear();
-                }
+                temp.clear();
                 break;
             }
             i--;
@@ -104,14 +134,13 @@ public class Board {
         // check down
         i = x + 1;
         while (i < SIZE) {
-            if (boardGrid[i][y] != 0 && boardGrid[i][y] != turn)
+            if (boardGrid[i][y] != 0 && boardGrid[i][y] != currentPlayer)
                 temp.add(new Disc(i, y, boardGrid[i][y]));
             else {
-                if (boardGrid[i][y] == turn) {
+                if (boardGrid[i][y] == currentPlayer)
                     discs.addAll(temp);
-                    temp.clear();
-                    break;
-                }
+                temp.clear();
+                break;
             }
             i++;
         }
@@ -119,14 +148,13 @@ public class Board {
         i = y - 1;
         int k = x - 1;
         while (i >= 0 && k >= 0) {
-            if (boardGrid[k][i] != 0 && boardGrid[k][i] != turn)
+            if (boardGrid[k][i] != 0 && boardGrid[k][i] != currentPlayer)
                 temp.add(new Disc(k, i, boardGrid[k][i]));
             else {
-                if (boardGrid[k][i] == turn) {
+                if (boardGrid[k][i] == currentPlayer)
                     discs.addAll(temp);
-                    temp.clear();
-                    break;
-                }
+                temp.clear();
+                break;
             }
             i--;
             k--;
@@ -135,14 +163,13 @@ public class Board {
         i = y + 1;
         k = x - 1;
         while (i < SIZE && k >= 0) {
-            if (boardGrid[k][i] != 0 && boardGrid[k][i] != turn)
+            if (boardGrid[k][i] != 0 && boardGrid[k][i] != currentPlayer)
                 temp.add(new Disc(k, i, boardGrid[k][i]));
             else {
-                if (boardGrid[k][i] == turn) {
+                if (boardGrid[k][i] == currentPlayer)
                     discs.addAll(temp);
-                    temp.clear();
-                    break;
-                }
+                temp.clear();
+                break;
             }
             i++;
             k--;
@@ -151,14 +178,13 @@ public class Board {
         i = x + 1;
         k = y - 1;
         while (i < SIZE && k >= 0) {
-            if (boardGrid[i][k] != 0 && boardGrid[i][k] != turn)
+            if (boardGrid[i][k] != 0 && boardGrid[i][k] != currentPlayer)
                 temp.add(new Disc(i, k, boardGrid[i][k]));
             else {
-                if (boardGrid[i][k] == turn) {
+                if (boardGrid[i][k] == currentPlayer)
                     discs.addAll(temp);
-                    temp.clear();
-                    break;
-                }
+                temp.clear();
+                break;
             }
             i++;
             k--;
@@ -167,29 +193,32 @@ public class Board {
         i = x + 1;
         k = y + 1;
         while (i < SIZE && k < SIZE) {
-            if (boardGrid[i][k] != 0 && boardGrid[i][k] != turn)
+            if (boardGrid[i][k] != 0 && boardGrid[i][k] != currentPlayer)
                 temp.add(new Disc(i, k, boardGrid[i][k]));
             else {
-                if (boardGrid[i][k] == turn) {
+                if (boardGrid[i][k] == currentPlayer)
                     discs.addAll(temp);
-                    temp.clear();
-                    break;
-                }
+                temp.clear();
+                break;
             }
             i++;
             k++;
         }
 
-        return discs;
+        return Collections.unmodifiableList(discs);
     }
 
 
-    public void changeTurn() {
-        turn = (turn == PLAYER) ? AI : PLAYER;
+    private void changeTurn() {
+        currentPlayer = (currentPlayer == HUMAN) ? AI : HUMAN;
     }
 
-    private boolean cellInsideBoard(int x, int y) {
+    private boolean cellExists(int x, int y) {
         return !(x < 0 || x > SIZE - 1 || y < 0 || y > SIZE - 1);
+    }
+
+    private boolean cellIsEmpty(int x, int y){
+        return boardGrid[x][y] == 0;
     }
 
     // gå igenom på papper hur den funkar, är typ som att den spelar mot sig själv. Videon hjälper!
@@ -243,7 +272,12 @@ public class Board {
     public static void main(String[] args) {
         Board test = new Board();
 
-        test.makeMove(2, 5);
+        test.makeMove(3, 2);
         System.out.println(test);
+        test.makeMove(2, 4);
+        System.out.println(test);
+        System.out.println(test.getPoints(AI));
+        System.out.println(test.getPoints(HUMAN));
+        System.out.println(test.getTotalDiscs());
     }
 }

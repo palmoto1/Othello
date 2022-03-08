@@ -3,14 +3,11 @@ public class Disc {
     private final static int WHITE = 1;
     private final static int BLACK = 2;
 
-    private int x;
-    private int y;
-
+    private Cell position;
     private int color;
 
     public Disc(int x, int y, int color) {
-        this.x = x;
-        this.y = y;
+        position = new Cell(x, y);
         this.color = color;
     }
 
@@ -24,14 +21,14 @@ public class Disc {
     }
 
     public int x(){
-        return x;
+        return position.x;
     }
 
     public int y(){
-        return y;
+        return position.y;
     }
 
     public String toString(){
-        return x + ", " + y + ": " + color;
+        return x() + ", " + y() + ": " + color;
     }
 }
