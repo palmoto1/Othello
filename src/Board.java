@@ -9,12 +9,14 @@ public class Board {
     private final int[][] boardGrid;
 
     private int currentPlayer;
+    private int currentOpponent;
 
 
     public Board() {
         boardGrid = new int[SIZE][SIZE];
         initializeBoard();
         currentPlayer = AI;
+        currentOpponent = HUMAN;
     }
 
     private void initializeBoard() {
@@ -29,17 +31,17 @@ public class Board {
 
     }
 
-    public int getPoints(int player){
+    public int getPoints(int player) {
         if (player == HUMAN || player == AI)
             return countDiscs(player);
         throw new IllegalArgumentException();
     }
 
-    public int getTotalDiscs(){
+    public int getTotalDiscs() {
         return TOTAL_CELLS - countDiscs(0);
     }
 
-    public List<Cell> validMoves(int player){
+    public List<Cell> validMoves(int player) {
         ArrayList<Cell> cells = new ArrayList<>();
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++)
@@ -49,7 +51,7 @@ public class Board {
         return cells;
     }
 
-    public boolean hasMoves(int player){
+    public boolean hasMoves(int player) {
         return !validMoves(player).isEmpty();
     }
 
@@ -57,18 +59,22 @@ public class Board {
         if (isValidMove(x, y)) {
             List<Disc> wonDiscs = wonDiscs(x, y);
             if (!wonDiscs.isEmpty()) {
-                boardGrid[x][y] = currentPlayer;
+                setDisc(x, y, currentPlayer);
                 flipDiscs(wonDiscs);
                 changeTurn();
             }
         }
     }
 
-    private int countDiscs(int player){
+    public boolean gameOver() {
+        return !hasMoves(HUMAN) && !hasMoves(AI);
+    }
+
+    private int countDiscs(int player) {
         int count = 0;
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++)
-                if (boardGrid[i][j] == player)
+                if (hasCell(i, j, player))
                     count++;
         }
         return count;
@@ -77,7 +83,7 @@ public class Board {
     private void flipDiscs(List<Disc> discs) {
         for (Disc d : discs) {
             d.flip();
-            boardGrid[d.x()][d.y()] = d.color();
+            setDisc(d.x(), d.y(), d.color());
         }
 
     }
@@ -91,13 +97,14 @@ public class Board {
     private List<Disc> wonDiscs(int x, int y) {
         List<Disc> discs = new ArrayList<>();
         List<Disc> temp = new ArrayList<>();
+
         // check left
         int i = y - 1;
         while (i >= 0) {
-            if (boardGrid[x][i] != 0 && boardGrid[x][i] != currentPlayer)
-                temp.add(new Disc(x, i, boardGrid[x][i]));
+            if (hasCell(x, i, currentOpponent))
+                temp.add(new Disc(x, i, currentOpponent));
             else {
-                if (boardGrid[x][i] == currentPlayer)
+                if (hasCell(x, i, currentPlayer))
                     discs.addAll(temp);
                 temp.clear();
                 break;
@@ -107,10 +114,10 @@ public class Board {
         // check right
         i = y + 1;
         while (i < SIZE) {
-            if (boardGrid[x][i] != 0 && boardGrid[x][i] != currentPlayer)
-                temp.add(new Disc(x, i, boardGrid[x][i]));
+            if (hasCell(x, i, currentOpponent))
+                temp.add(new Disc(x, i, currentOpponent));
             else {
-                if (boardGrid[x][i] == currentPlayer)
+                if (hasCell(x, i, currentPlayer))
                     discs.addAll(temp);
                 temp.clear();
                 break;
@@ -121,10 +128,10 @@ public class Board {
         // check up
         i = x - 1;
         while (i >= 0) {
-            if (boardGrid[i][y] != 0 && boardGrid[i][y] != currentPlayer)
-                temp.add(new Disc(i, y, boardGrid[i][y]));
+            if (hasCell(i, y, currentOpponent))
+                temp.add(new Disc(i, y, currentOpponent));
             else {
-                if (boardGrid[i][y] == currentPlayer)
+                if (hasCell(i, y, currentPlayer))
                     discs.addAll(temp);
                 temp.clear();
                 break;
@@ -134,10 +141,10 @@ public class Board {
         // check down
         i = x + 1;
         while (i < SIZE) {
-            if (boardGrid[i][y] != 0 && boardGrid[i][y] != currentPlayer)
-                temp.add(new Disc(i, y, boardGrid[i][y]));
+            if (hasCell(i, y, currentOpponent))
+                temp.add(new Disc(i, y, currentOpponent));
             else {
-                if (boardGrid[i][y] == currentPlayer)
+                if (hasCell(i, y, currentPlayer))
                     discs.addAll(temp);
                 temp.clear();
                 break;
@@ -148,10 +155,10 @@ public class Board {
         i = y - 1;
         int k = x - 1;
         while (i >= 0 && k >= 0) {
-            if (boardGrid[k][i] != 0 && boardGrid[k][i] != currentPlayer)
-                temp.add(new Disc(k, i, boardGrid[k][i]));
+            if (hasCell(k, i, currentOpponent))
+                temp.add(new Disc(k, i, currentOpponent));
             else {
-                if (boardGrid[k][i] == currentPlayer)
+                if (hasCell(k, i, currentPlayer))
                     discs.addAll(temp);
                 temp.clear();
                 break;
@@ -163,10 +170,10 @@ public class Board {
         i = y + 1;
         k = x - 1;
         while (i < SIZE && k >= 0) {
-            if (boardGrid[k][i] != 0 && boardGrid[k][i] != currentPlayer)
-                temp.add(new Disc(k, i, boardGrid[k][i]));
+            if (hasCell(k, i, currentOpponent))
+                temp.add(new Disc(k, i, currentOpponent));
             else {
-                if (boardGrid[k][i] == currentPlayer)
+                if (hasCell(k, i, currentPlayer))
                     discs.addAll(temp);
                 temp.clear();
                 break;
@@ -178,10 +185,10 @@ public class Board {
         i = x + 1;
         k = y - 1;
         while (i < SIZE && k >= 0) {
-            if (boardGrid[i][k] != 0 && boardGrid[i][k] != currentPlayer)
-                temp.add(new Disc(i, k, boardGrid[i][k]));
+            if (hasCell(i, k, currentOpponent))
+                temp.add(new Disc(i, k, currentOpponent));
             else {
-                if (boardGrid[i][k] == currentPlayer)
+                if (hasCell(i, k, currentPlayer))
                     discs.addAll(temp);
                 temp.clear();
                 break;
@@ -193,10 +200,10 @@ public class Board {
         i = x + 1;
         k = y + 1;
         while (i < SIZE && k < SIZE) {
-            if (boardGrid[i][k] != 0 && boardGrid[i][k] != currentPlayer)
-                temp.add(new Disc(i, k, boardGrid[i][k]));
+            if (hasCell(i, k, currentOpponent))
+                temp.add(new Disc(i, k, currentOpponent));
             else {
-                if (boardGrid[i][k] == currentPlayer)
+                if (hasCell(i, k, currentPlayer))
                     discs.addAll(temp);
                 temp.clear();
                 break;
@@ -210,14 +217,28 @@ public class Board {
 
 
     private void changeTurn() {
-        currentPlayer = (currentPlayer == HUMAN) ? AI : HUMAN;
+        if (currentPlayer == HUMAN) {
+            currentPlayer = AI;
+            currentOpponent = HUMAN;
+        } else {
+            currentPlayer = HUMAN;
+            currentOpponent = AI;
+        }
+    }
+
+    private void setDisc(int x, int y, int player) {
+        boardGrid[x][y] = player;
+    }
+
+    private boolean hasCell(int x, int y, int player) {
+        return boardGrid[x][y] == player;
     }
 
     private boolean cellExists(int x, int y) {
         return !(x < 0 || x > SIZE - 1 || y < 0 || y > SIZE - 1);
     }
 
-    private boolean cellIsEmpty(int x, int y){
+    private boolean cellIsEmpty(int x, int y) {
         return boardGrid[x][y] == 0;
     }
 
@@ -227,34 +248,34 @@ public class Board {
     // vad ska CPUn nästa drag vara? den kan "testa" sig fram med aloritmen och ta tillbaka
     // behöver nog inte ha noder som parameter, det ärför att förstå
     private int miniMax(/*Node node, */int depth, int alpha, int beta, boolean maxPlayer) {
-        if (depth == 0) //or if game is over
-            return 1; //evaluate result/score of this last node
-
-        int evaluation;
-        if (maxPlayer) {
-            //find possible moves and do DFS
-            int maxEval = Integer.MIN_VALUE; //start value, updates through for loop
-            //for (Node child : possiblePositions){
-            evaluation = miniMax(/*child, */depth - 1, alpha, beta, false);
-            maxEval = Math.max(maxEval, evaluation);
-            alpha = Math.max(alpha, evaluation);
-            if (beta <= alpha) {
-                //break;
+        if (depth > 0 && !gameOver()) {
+            int evaluation;
+            if (maxPlayer) {
+                //find possible moves and do DFS
+                int maxEval = Integer.MIN_VALUE; //start value, updates through for loop
+                //for (Node child : possiblePositions){
+                evaluation = miniMax(/*child, */depth - 1, alpha, beta, false);
+                maxEval = Math.max(maxEval, evaluation);
+                alpha = Math.max(alpha, evaluation);
+                if (beta <= alpha) {
+                    //break;
+                }
+                //}
+                return maxEval;
+            } else {
+                int minEval = Integer.MAX_VALUE; //start value, updates through for loop
+                //for (Node n : possiblePositions){
+                evaluation = miniMax(depth - 1, alpha, beta, true);
+                minEval = Math.min(minEval, evaluation);
+                beta = Math.min(beta, evaluation);
+                if (beta <= alpha) {
+                    //break;
+                }
+                // }
+                return minEval;
             }
-            //}
-            return maxEval;
-        } else {
-            int minEval = Integer.MAX_VALUE; //start value, updates through for loop
-            //for (Node n : possiblePositions){
-            evaluation = miniMax(depth - 1, alpha, beta, true);
-            minEval = Math.min(minEval, evaluation);
-            beta = Math.min(beta, evaluation);
-            if (beta <= alpha) {
-                //break;
-            }
-            // }
-            return minEval;
         }
+        return getPoints(AI) - getPoints(HUMAN);
 
     }
 
@@ -275,6 +296,8 @@ public class Board {
         test.makeMove(3, 2);
         System.out.println(test);
         test.makeMove(2, 4);
+        System.out.println(test);
+        test.makeMove(5, 5);
         System.out.println(test);
         System.out.println(test.getPoints(AI));
         System.out.println(test.getPoints(HUMAN));
