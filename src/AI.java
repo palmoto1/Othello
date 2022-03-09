@@ -70,7 +70,7 @@ public class AI {
             nextMove = optimal;
             return bestEvaluation;
         }
-        return bh.getPoints(2);
+        return bh.getPointsDifference(2);
     }
 
 }
