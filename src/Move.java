@@ -12,6 +12,10 @@ public class Move {
         this.wonDiscs = wonDiscs;
     }
 
+    public Move(int x, int y) {
+        this(x, y, null);
+    }
+
     public int x() {
         return x;
     }

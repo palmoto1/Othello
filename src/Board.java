@@ -11,6 +11,8 @@ public class Board {
     private int currentPlayer;
     private int currentOpponent;
 
+    private Move nextAIMove = null;
+
 
     public Board() {
         boardGrid = new int[SIZE][SIZE];
@@ -65,11 +67,15 @@ public class Board {
         if (isAvailableCell(x, y)) {
             List<Disc> wonDiscs = wonDiscs(x, y, player);
             if (!wonDiscs.isEmpty()) {
-                setDisc(x, y, player);
-                flipDiscs(wonDiscs);
+                doMove(new Move(x, y, wonDiscs), player);
                 //changeTurn();
             }
         }
+    }
+
+    private void doMove(Move move, int player) {
+        setDisc(move.x(), move.y(), player);
+        flipDiscs(move.getWonDiscs());
     }
 
     public boolean gameOver() {
@@ -234,6 +240,7 @@ public class Board {
         }
     }
 
+
     private void setDisc(int x, int y, int player) {
         boardGrid[x][y] = player;
     }
@@ -250,57 +257,55 @@ public class Board {
         return boardGrid[x][y] == 0;
     }
 
-    // gå igenom på papper hur den funkar, är typ som att den spelar mot sig själv. Videon hjälper!
-    // pruning hjälper då en Nod redan vet att den har ett bättre alternativ och inte behöver
-    // fortsätta söka genom sina barn
-    // vad ska CPUn nästa drag vara? den kan "testa" sig fram med aloritmen och ta tillbaka
-    // behöver nog inte ha noder som parameter, det ärför att förstå
 
-    //TODO: fortsätt fixa
-    private int miniMax(int depth, int alpha, int beta, boolean maxPlayer) {
+    private int miniMax(int depth, int alpha, int beta, int player) {
         if (depth > 0 && !gameOver()) {
+
             List<Move> validMoves;
             int evaluation;
-            if (maxPlayer) {
+            int bestEvaluation;
+            int nextPlayer;
+
+            if (player == AI) {
                 validMoves = getValidMoves(AI);
-                //find possible moves and do DFS
-                int maxEval = Integer.MIN_VALUE; //start value, updates through for loop
-                for (Move move : validMoves) {
-                    setDisc(move.x(), move.y(), AI);
-                    flipDiscs(move.getWonDiscs());
-
-                    evaluation = miniMax(depth - 1, alpha, beta, false);
-
-                    setDisc(move.x(), move.y(), 0);
-                    flipDiscs(move.getWonDiscs());
-
-                    maxEval = Math.max(maxEval, evaluation);
-                    alpha = Math.max(alpha, evaluation);
-                    if (beta <= alpha) {
-                        break;
-                    }
-                }
-                return maxEval;
+                bestEvaluation = Integer.MIN_VALUE;
+                nextPlayer = HUMAN;
             } else {
                 validMoves = getValidMoves(HUMAN);
-                int minEval = Integer.MAX_VALUE; //start value, updates through for loop
-                for (Move move : validMoves) {
-                    setDisc(move.x(), move.y(), AI);
-                    flipDiscs(move.getWonDiscs());
+                bestEvaluation = Integer.MAX_VALUE;
+                nextPlayer = AI;
+            }
 
-                    evaluation = miniMax(depth - 1, alpha, beta, true);
+            Move optimal = validMoves.get(0);
 
-                    setDisc(move.x(), move.y(), 0);
-                    flipDiscs(move.getWonDiscs());
+            for (Move move : validMoves) {
+                doMove(move, player);
 
-                    minEval = Math.min(minEval, evaluation);
+                evaluation = miniMax(depth - 1, alpha, beta, nextPlayer);
+
+                doMove(move, 0);
+
+                if (player == AI) {
+                    alpha = Math.max(alpha, evaluation);
+                    if (evaluation > bestEvaluation) {
+                        bestEvaluation = evaluation;
+                        optimal = move;
+                    }
+
+                } else {
                     beta = Math.min(beta, evaluation);
-                    if (beta <= alpha) {
-                        break;
+                    if (evaluation < bestEvaluation) {
+                        bestEvaluation = evaluation;
+                        optimal = move;
                     }
                 }
-                return minEval;
+
+                if (beta <= alpha)
+                    break;
             }
+
+            nextAIMove = optimal;
+            return bestEvaluation;
         }
         return getPoints(AI) - getPoints(HUMAN);
 
@@ -317,10 +322,51 @@ public class Board {
         return sb.toString();
     }
 
+    public void testGameLoop() {
+        boolean gameOver = false;
+        Scanner scanner = new Scanner(System.in);
+
+        Move nextMove;
+
+
+        while (!gameOver) {
+
+            if (currentPlayer == HUMAN) {
+                System.out.print("Enter x: ");
+                int x = scanner.nextInt();
+                System.out.println();
+                System.out.print("Enter y: ");
+                int y = scanner.nextInt();
+                System.out.println();
+                nextMove = new Move(x, y);
+            } else {
+                miniMax(5, Integer.MIN_VALUE, Integer.MAX_VALUE, AI);
+                nextMove = nextAIMove;
+            }
+
+            makeMove(nextMove.x(), nextMove.y(), currentPlayer);
+            System.out.println(toString());
+            System.out.print("Your score: " + getPoints(HUMAN));
+            System.out.println();
+            System.out.print("AI score: " + getPoints(AI));
+            System.out.println();
+            changeTurn();
+            gameOver = gameOver();
+        }
+
+        if (getPoints(AI) > getPoints(HUMAN))
+            System.out.println("You lose");
+        else if (getPoints(AI) < getPoints(HUMAN))
+            System.out.println("You won");
+        else
+            System.out.println("Draw");
+        System.out.println(toString());
+    }
+
     public static void main(String[] args) {
         Board test = new Board();
 
-        test.makeMove(3, 2, AI);
+        /*test.makeMove(3, 2, AI);
         System.out.println(test);
         test.makeMove(2, 4, HUMAN);
         System.out.println(test);
@@ -328,6 +374,56 @@ public class Board {
         System.out.println(test);
         System.out.println(test.getPoints(AI));
         System.out.println(test.getPoints(HUMAN));
-        System.out.println(test.getTotalDiscs());
+        System.out.println(test.getTotalDiscs());*/
+        test.testGameLoop();
     }
 }
+
+
+            /*if (player == AI) {
+                validMoves = getValidMoves(AI);
+                //find possible moves and do DFS
+                int maxEvaluation = Integer.MIN_VALUE; //start value, updates through for loop
+                for (Move move : validMoves) {
+                    doMove(move, AI);
+
+                    evaluation = miniMax(depth - 1, alpha, beta, HUMAN);
+
+                    doMove(move, 0);
+
+                    if (evaluation > maxEvaluation) {
+                        maxEvaluation = evaluation;
+                        optimal = move;
+                    }
+
+                    alpha = Math.max(alpha, evaluation);
+                    if (beta <= alpha)
+                        break;
+                }
+                nextAIMove = optimal;
+                return maxEvaluation;
+
+            } else {
+                validMoves = getValidMoves(HUMAN);
+                int minEvaluation = Integer.MAX_VALUE; //start value, updates through for loop
+                for (Move move : validMoves) {
+                    doMove(move, HUMAN);
+
+                    evaluation = miniMax(depth - 1, alpha, beta, AI);
+
+                    doMove(move, 0); //redoing the previous move
+
+                    //minEvaluation = Math.min(minEvaluation, evaluation);
+                    if (evaluation < minEvaluation) {
+                        minEvaluation = evaluation;
+                        optimal = move;
+                    }
+
+                    beta = Math.min(beta, evaluation);
+                    if (beta <= alpha)
+                        break;
+                }
+                nextAIMove = optimal;
+                return minEvaluation;
+            }
+        }*/
