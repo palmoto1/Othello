@@ -1,6 +1,8 @@
 import java.util.*;
 
-public class Board {
+public class BoardHandler {
+
+    //TODO: had a weird game, maybe some bug somwhere? split up into classes and make GUI
 
     private final static int SIZE = 8;
     private final static int TOTAL_CELLS = 64;
@@ -11,10 +13,8 @@ public class Board {
     private int currentPlayer;
     private int currentOpponent;
 
-    private Move nextAIMove = null;
 
-
-    public Board() {
+    public BoardHandler() {
         boardGrid = new int[SIZE][SIZE];
         initializeBoard();
         currentPlayer = AI;
@@ -31,6 +31,14 @@ public class Board {
         boardGrid[4][3] = 2;
         boardGrid[4][4] = 1;
 
+    }
+
+    public int getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public int getCurrentOpponent() {
+        return currentOpponent;
     }
 
     public int getPoints(int player) {
@@ -73,9 +81,24 @@ public class Board {
         }
     }
 
-    private void doMove(Move move, int player) {
+    public int getPointsDifference(int player) {
+        int other = (player == AI) ? HUMAN : AI;
+        return getPoints(player) - getPoints(other);
+    }
+
+    public void doMove(Move move, int player) {
         setDisc(move.x(), move.y(), player);
         flipDiscs(move.getWonDiscs());
+    }
+
+    public void changeTurn() {
+        if (currentPlayer == HUMAN) {
+            currentPlayer = AI;
+            currentOpponent = HUMAN;
+        } else {
+            currentPlayer = HUMAN;
+            currentOpponent = AI;
+        }
     }
 
     public boolean gameOver() {
@@ -106,6 +129,7 @@ public class Board {
 
 
     // really ugly, find solution for duplicates if you can
+    // had a weird game, maybe some bug somwhere?
     private List<Disc> wonDiscs(int x, int y, int player) {
         int opponent = player == AI ? HUMAN : AI;
 
@@ -230,17 +254,6 @@ public class Board {
     }
 
 
-    private void changeTurn() {
-        if (currentPlayer == HUMAN) {
-            currentPlayer = AI;
-            currentOpponent = HUMAN;
-        } else {
-            currentPlayer = HUMAN;
-            currentOpponent = AI;
-        }
-    }
-
-
     private void setDisc(int x, int y, int player) {
         boardGrid[x][y] = player;
     }
@@ -257,60 +270,6 @@ public class Board {
         return boardGrid[x][y] == 0;
     }
 
-
-    private int miniMax(int depth, int alpha, int beta, int player) {
-        if (depth > 0 && !gameOver()) {
-
-            List<Move> validMoves;
-            int evaluation;
-            int bestEvaluation;
-            int nextPlayer;
-
-            if (player == AI) {
-                validMoves = getValidMoves(AI);
-                bestEvaluation = Integer.MIN_VALUE;
-                nextPlayer = HUMAN;
-            } else {
-                validMoves = getValidMoves(HUMAN);
-                bestEvaluation = Integer.MAX_VALUE;
-                nextPlayer = AI;
-            }
-
-            Move optimal = validMoves.get(0);
-
-            for (Move move : validMoves) {
-                doMove(move, player);
-
-                evaluation = miniMax(depth - 1, alpha, beta, nextPlayer);
-
-                doMove(move, 0);
-
-                if (player == AI) {
-                    alpha = Math.max(alpha, evaluation);
-                    if (evaluation > bestEvaluation) {
-                        bestEvaluation = evaluation;
-                        optimal = move;
-                    }
-
-                } else {
-                    beta = Math.min(beta, evaluation);
-                    if (evaluation < bestEvaluation) {
-                        bestEvaluation = evaluation;
-                        optimal = move;
-                    }
-                }
-
-                if (beta <= alpha)
-                    break;
-            }
-
-            nextAIMove = optimal;
-            return bestEvaluation;
-        }
-        return getPoints(AI) - getPoints(HUMAN);
-
-    }
-
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < SIZE; i++) {
@@ -321,64 +280,7 @@ public class Board {
         }
         return sb.toString();
     }
-
-    public void testGameLoop() {
-        boolean gameOver = false;
-        Scanner scanner = new Scanner(System.in);
-
-        Move nextMove;
-
-
-        while (!gameOver) {
-
-            if (currentPlayer == HUMAN) {
-                System.out.print("Enter x: ");
-                int x = scanner.nextInt();
-                System.out.println();
-                System.out.print("Enter y: ");
-                int y = scanner.nextInt();
-                System.out.println();
-                nextMove = new Move(x, y);
-            } else {
-                miniMax(5, Integer.MIN_VALUE, Integer.MAX_VALUE, AI);
-                nextMove = nextAIMove;
-            }
-
-            makeMove(nextMove.x(), nextMove.y(), currentPlayer);
-            System.out.println(toString());
-            System.out.print("Your score: " + getPoints(HUMAN));
-            System.out.println();
-            System.out.print("AI score: " + getPoints(AI));
-            System.out.println();
-            changeTurn();
-            gameOver = gameOver();
-        }
-
-        if (getPoints(AI) > getPoints(HUMAN))
-            System.out.println("You lose");
-        else if (getPoints(AI) < getPoints(HUMAN))
-            System.out.println("You won");
-        else
-            System.out.println("Draw");
-        System.out.println(toString());
-    }
-
-    public static void main(String[] args) {
-        Board test = new Board();
-
-        /*test.makeMove(3, 2, AI);
-        System.out.println(test);
-        test.makeMove(2, 4, HUMAN);
-        System.out.println(test);
-        test.makeMove(5, 5, AI);
-        System.out.println(test);
-        System.out.println(test.getPoints(AI));
-        System.out.println(test.getPoints(HUMAN));
-        System.out.println(test.getTotalDiscs());*/
-        test.testGameLoop();
-    }
 }
-
 
             /*if (player == AI) {
                 validMoves = getValidMoves(AI);
