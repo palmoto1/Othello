@@ -11,10 +11,12 @@ public class Main {
 
 
         while (!gameOver) {
+            int currentPlayer = bh.hasTurn(1) ? 1 : 2;
 
-            if (bh.getCurrentPlayer() == 1) {
-                System.out.print("Enter cell: ");
+            if (bh.hasTurn(1)) {
+                System.out.print("Enter x: ");
                 int x = scanner.nextInt();
+                System.out.print("Enter y: ");
                 int y = scanner.nextInt();
                 System.out.println();
                 nextMove = new Move(x, y);
@@ -25,14 +27,18 @@ public class Main {
                 System.out.println();
             }
 
-            bh.makeMove(nextMove.x(), nextMove.y(), bh.getCurrentPlayer());
-            System.out.println(bh.toString());
-            System.out.print("Your score: " + bh.getPoints(1));
-            System.out.println();
-            System.out.print("AI score: " + bh.getPoints(2));
-            System.out.println();
-            bh.changeTurn();
-            gameOver = bh.gameOver();
+
+            if (bh.makeMove(nextMove.x(), nextMove.y(), currentPlayer)) {
+                System.out.println(bh.toString());
+                System.out.print("Your score: " + bh.getPoints(1));
+                System.out.println();
+                System.out.print("AI score: " + bh.getPoints(2));
+                System.out.println();
+                bh.changeTurn();
+                gameOver = bh.gameOver();
+            }
+            else
+                System.out.println("Unvalid cell");
         }
 
         if (bh.getPoints(2) > bh.getPoints(1))
@@ -60,5 +66,15 @@ public class Main {
         testGame(bh, 5);
     }
 }
+
+/*public static void main(String[] args) {
+        BoardHandler test = new BoardHandler();
+        System.out.println(test);
+        test.makeMove(2, 3, AI);
+        System.out.println(test);
+        test.makeMove(2, 2, HUMAN);
+
+        System.out.println(test);
+    }*/
 
 

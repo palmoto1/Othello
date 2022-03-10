@@ -2,7 +2,9 @@ import java.util.*;
 
 public class BoardHandler {
 
-    //TODO: had a weird game, maybe some bug somwhere? split up into classes and make GUI
+    private enum Direction {
+        LEFT, RIGHT, UP, DOWN, LEFT_UP, RIGHT_UP, LEFT_DOWN, RIGHT_DOWN
+    }
 
     private final static int SIZE = 8;
     private final static int TOTAL_CELLS = 64;
@@ -33,14 +35,12 @@ public class BoardHandler {
 
     }
 
-    public int getCurrentPlayer() {
-        return currentPlayer;
+    // game class
+    public boolean hasTurn(int player) {
+        return currentPlayer == player;
     }
 
-    public int getCurrentOpponent() {
-        return currentOpponent;
-    }
-
+    //
     public int getPoints(int player) {
         if (player == HUMAN || player == AI)
             return countDiscs(player);
@@ -50,6 +50,7 @@ public class BoardHandler {
     public int getTotalDiscs() {
         return TOTAL_CELLS - countDiscs(0);
     }
+
 
     public List<Move> getValidMoves(int player) {
         List<Move> moves = new ArrayList<>();
@@ -71,16 +72,20 @@ public class BoardHandler {
         return !getValidMoves(player).isEmpty();
     }
 
-    public void makeMove(int x, int y, int player) {
+    public boolean makeMove(int x, int y, int player) {
         if (isAvailableCell(x, y)) {
             List<Disc> wonDiscs = wonDiscs(x, y, player);
             if (!wonDiscs.isEmpty()) {
                 doMove(new Move(x, y, wonDiscs), player);
+                return true;
                 //changeTurn();
             }
         }
+        return false;
     }
 
+
+    // evaluator class
     public int getPointsDifference(int player) {
         int other = (player == AI) ? HUMAN : AI;
         return getPoints(player) - getPoints(other);
@@ -91,6 +96,7 @@ public class BoardHandler {
         flipDiscs(move.getWonDiscs());
     }
 
+    //game class
     public void changeTurn() {
         if (currentPlayer == HUMAN) {
             currentPlayer = AI;
@@ -101,6 +107,8 @@ public class BoardHandler {
         }
     }
 
+
+    // game/evaluator class
     public boolean gameOver() {
         return !hasMoves(HUMAN) && !hasMoves(AI);
     }
@@ -124,131 +132,85 @@ public class BoardHandler {
     }
 
     private boolean isAvailableCell(int x, int y) {
-        return cellIsEmpty(x, y) && cellExists(x, y);
+        return cellExists(x, y) && cellIsEmpty(x, y);
     }
 
+    private List<Disc> searchForWonDiscs(Direction direction, int i, int j, int player) {
 
-    // really ugly, find solution for duplicates if you can
-    // had a weird game, maybe some bug somwhere?
-    private List<Disc> wonDiscs(int x, int y, int player) {
+        int dx;
+        int dy;
+
+        switch (direction) {
+            case LEFT:
+                dx = 0;
+                dy = -1;
+                break;
+            case RIGHT:
+                dx = 0;
+                dy = 1;
+                break;
+            case UP:
+                dx = -1;
+                dy = 0;
+                break;
+            case DOWN:
+                dx = 1;
+                dy = 0;
+                break;
+            case LEFT_DOWN:
+                dx = 1;
+                dy = -1;
+                break;
+            case LEFT_UP:
+                dx = -1;
+                dy = -1;
+                break;
+            case RIGHT_DOWN:
+                dx = 1;
+                dy = 1;
+                break;
+            case RIGHT_UP:
+                dx = -1;
+                dy = 1;
+                break;
+            default:
+                dx = dy = 0;
+        }
+
+
         int opponent = player == AI ? HUMAN : AI;
 
         List<Disc> discs = new ArrayList<>();
-        List<Disc> temp = new ArrayList<>();
 
-        // check left
-        int i = y - 1;
-        while (i >= 0) {
-            if (hasCell(x, i, opponent))
-                temp.add(new Disc(x, i, opponent));
+        while (i >= 0 && i < SIZE && j >= 0 && j < SIZE) {
+            if (hasCell(i, j, opponent))
+                discs.add(new Disc(i, j, opponent));
             else {
-                if (hasCell(x, i, player))
-                    discs.addAll(temp);
-                temp.clear();
+                if (hasCell(i, j, player))
+                    return Collections.unmodifiableList(discs);
+                discs.clear();
                 break;
             }
-            i--;
+            i += dx;
+            j += dy;
         }
-        // check right
-        i = y + 1;
-        while (i < SIZE) {
-            if (hasCell(x, i, opponent))
-                temp.add(new Disc(x, i, opponent));
-            else {
-                if (hasCell(x, i, player))
-                    discs.addAll(temp);
-                temp.clear();
-                break;
+        return Collections.unmodifiableList(discs);
+    }
 
-            }
-            i++;
-        }
-        // check up
-        i = x - 1;
-        while (i >= 0) {
-            if (hasCell(i, y, opponent))
-                temp.add(new Disc(i, y, opponent));
-            else {
-                if (hasCell(i, y, player))
-                    discs.addAll(temp);
-                temp.clear();
-                break;
-            }
-            i--;
-        }
-        // check down
-        i = x + 1;
-        while (i < SIZE) {
-            if (hasCell(i, y, opponent))
-                temp.add(new Disc(i, y, opponent));
-            else {
-                if (hasCell(i, y, player))
-                    discs.addAll(temp);
-                temp.clear();
-                break;
-            }
-            i++;
-        }
-        // check left-up
-        i = y - 1;
-        int k = x - 1;
-        while (i >= 0 && k >= 0) {
-            if (hasCell(k, i, opponent))
-                temp.add(new Disc(k, i, opponent));
-            else {
-                if (hasCell(k, i, player))
-                    discs.addAll(temp);
-                temp.clear();
-                break;
-            }
-            i--;
-            k--;
-        }
-        // check right-up
-        i = y + 1;
-        k = x - 1;
-        while (i < SIZE && k >= 0) {
-            if (hasCell(k, i, opponent))
-                temp.add(new Disc(k, i, opponent));
-            else {
-                if (hasCell(k, i, player))
-                    discs.addAll(temp);
-                temp.clear();
-                break;
-            }
-            i++;
-            k--;
-        }
-        // check left-down
-        i = x + 1;
-        k = y - 1;
-        while (i < SIZE && k >= 0) {
-            if (hasCell(i, k, opponent))
-                temp.add(new Disc(i, k, opponent));
-            else {
-                if (hasCell(i, k, player))
-                    discs.addAll(temp);
-                temp.clear();
-                break;
-            }
-            i++;
-            k--;
-        }
-        // check right-down
-        i = x + 1;
-        k = y + 1;
-        while (i < SIZE && k < SIZE) {
-            if (hasCell(i, k, opponent))
-                temp.add(new Disc(i, k, opponent));
-            else {
-                if (hasCell(i, k, player))
-                    discs.addAll(temp);
-                temp.clear();
-                break;
-            }
-            i++;
-            k++;
-        }
+
+    private List<Disc> wonDiscs(int i, int j, int player) {
+
+        List<Disc> discs = new ArrayList<>();
+
+        discs.addAll(searchForWonDiscs(Direction.LEFT, i, j - 1, player));
+        discs.addAll(searchForWonDiscs(Direction.RIGHT, i, j + 1, player));
+        discs.addAll(searchForWonDiscs(Direction.UP, i - 1, j, player));
+        discs.addAll(searchForWonDiscs(Direction.DOWN, i + 1, j, player));
+        discs.addAll(searchForWonDiscs(Direction.LEFT_UP, i - 1, j - 1, player));
+        discs.addAll(searchForWonDiscs(Direction.LEFT_DOWN, i + 1, j - 1, player));
+        discs.addAll(searchForWonDiscs(Direction.RIGHT_UP, i - 1, j + 1, player));
+        discs.addAll(searchForWonDiscs(Direction.RIGHT_DOWN, i + 1, j + 1, player));
+
 
         return Collections.unmodifiableList(discs);
     }
@@ -281,51 +243,3 @@ public class BoardHandler {
         return sb.toString();
     }
 }
-
-            /*if (player == AI) {
-                validMoves = getValidMoves(AI);
-                //find possible moves and do DFS
-                int maxEvaluation = Integer.MIN_VALUE; //start value, updates through for loop
-                for (Move move : validMoves) {
-                    doMove(move, AI);
-
-                    evaluation = miniMax(depth - 1, alpha, beta, HUMAN);
-
-                    doMove(move, 0);
-
-                    if (evaluation > maxEvaluation) {
-                        maxEvaluation = evaluation;
-                        optimal = move;
-                    }
-
-                    alpha = Math.max(alpha, evaluation);
-                    if (beta <= alpha)
-                        break;
-                }
-                nextAIMove = optimal;
-                return maxEvaluation;
-
-            } else {
-                validMoves = getValidMoves(HUMAN);
-                int minEvaluation = Integer.MAX_VALUE; //start value, updates through for loop
-                for (Move move : validMoves) {
-                    doMove(move, HUMAN);
-
-                    evaluation = miniMax(depth - 1, alpha, beta, AI);
-
-                    doMove(move, 0); //redoing the previous move
-
-                    //minEvaluation = Math.min(minEvaluation, evaluation);
-                    if (evaluation < minEvaluation) {
-                        minEvaluation = evaluation;
-                        optimal = move;
-                    }
-
-                    beta = Math.min(beta, evaluation);
-                    if (beta <= alpha)
-                        break;
-                }
-                nextAIMove = optimal;
-                return minEvaluation;
-            }
-        }*/
