@@ -188,13 +188,16 @@ public class BoardHandler {
 
         List<Disc> discs = new ArrayList<>();
 
+        //skip the cell we already stand on
+        i+=dx;
+        j+=dy;
+
         while (i >= 0 && i < SIZE && j >= 0 && j < SIZE) {
             if (hasCell(i, j, opponent))
                 discs.add(new Disc(i, j, opponent));
-            else {
-                if (hasCell(i, j, player))
-                    return Collections.unmodifiableList(discs);
-                discs.clear();
+            else { // player has cell or it is empty we do not have to search further
+                if (hasCell(i, j, 0))
+                    discs.clear(); // if the cell was empty we clear the discs (no discs were won)
                 break;
             }
             i += dx;
@@ -208,14 +211,8 @@ public class BoardHandler {
 
         List<Disc> discs = new ArrayList<>();
 
-        discs.addAll(searchForWonDiscs(Direction.LEFT, i, j - 1, player));
-        discs.addAll(searchForWonDiscs(Direction.RIGHT, i, j + 1, player));
-        discs.addAll(searchForWonDiscs(Direction.UP, i - 1, j, player));
-        discs.addAll(searchForWonDiscs(Direction.DOWN, i + 1, j, player));
-        discs.addAll(searchForWonDiscs(Direction.LEFT_UP, i - 1, j - 1, player));
-        discs.addAll(searchForWonDiscs(Direction.LEFT_DOWN, i + 1, j - 1, player));
-        discs.addAll(searchForWonDiscs(Direction.RIGHT_UP, i - 1, j + 1, player));
-        discs.addAll(searchForWonDiscs(Direction.RIGHT_DOWN, i + 1, j + 1, player));
+        for (Direction direction : Direction.values())
+            discs.addAll(searchForWonDiscs(direction, i, j, player));
 
 
         return Collections.unmodifiableList(discs);
