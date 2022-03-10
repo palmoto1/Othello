@@ -11,6 +11,7 @@ public class BoardHandler {
     private final static int HUMAN = 1;
     private final static int AI = 2;
     private final int[][] boardGrid;
+    private int noOfDiscs = 0;
 
     private int currentPlayer;
     private int currentOpponent;
@@ -48,7 +49,7 @@ public class BoardHandler {
     }
 
     public int getTotalDiscs() {
-        return TOTAL_CELLS - countDiscs(0);
+        return TOTAL_CELLS - noOfDiscs;
     }
 
 
@@ -94,6 +95,7 @@ public class BoardHandler {
     public void doMove(Move move, int player) {
         setDisc(move.x(), move.y(), player);
         flipDiscs(move.getWonDiscs());
+        noOfDiscs++;
     }
 
     //game class
@@ -105,6 +107,10 @@ public class BoardHandler {
             currentPlayer = HUMAN;
             currentOpponent = AI;
         }
+    }
+
+    public boolean hasCell(int x, int y, int player) {
+        return boardGrid[x][y] == player;
     }
 
 
@@ -218,10 +224,6 @@ public class BoardHandler {
 
     private void setDisc(int x, int y, int player) {
         boardGrid[x][y] = player;
-    }
-
-    private boolean hasCell(int x, int y, int player) {
-        return boardGrid[x][y] == player;
     }
 
     private boolean cellExists(int x, int y) {
