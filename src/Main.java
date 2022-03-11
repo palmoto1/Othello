@@ -9,7 +9,6 @@ public class Main {
 
         Move nextMove;
 
-
         while (!gameOver) {
             int currentPlayer = bh.hasTurn(1) ? 1 : 2;
 
@@ -63,7 +62,7 @@ public class Main {
         System.out.println(test.getPoints(AI));
         System.out.println(test.getPoints(HUMAN));
         System.out.println(test.getTotalDiscs());*/
-        testGame(bh, 5);
+        testGame(bh, 3);
     }
 }
 

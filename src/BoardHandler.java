@@ -25,6 +25,7 @@ public class BoardHandler {
     }
 
     private void initializeBoard() {
+
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++)
                 boardGrid[i][j] = 0;
@@ -70,14 +71,15 @@ public class BoardHandler {
     }
 
     public boolean hasMoves(int player) {
-        return !getValidMoves(player).isEmpty();
+        return getValidMoves(player).size() > 0;
     }
 
-    public boolean makeMove(int x, int y, int player) {
-        if (isAvailableCell(x, y)) {
-            List<Disc> wonDiscs = wonDiscs(x, y, player);
+    //Should take a Move as param instead
+    public boolean makeMove(int i, int j, int player) {
+        if (isAvailableCell(i, j)) {
+            List<Disc> wonDiscs = wonDiscs(i, j, player);
             if (!wonDiscs.isEmpty()) {
-                doMove(new Move(x, y, wonDiscs), player);
+                doMove(new Move(i, j, wonDiscs), player);
                 return true;
                 //changeTurn();
             }
@@ -109,8 +111,8 @@ public class BoardHandler {
         }
     }
 
-    public boolean hasCell(int x, int y, int player) {
-        return boardGrid[x][y] == player;
+    public boolean hasCell(int i, int j, int player) {
+        return boardGrid[i][j] == player;
     }
 
 
@@ -137,11 +139,11 @@ public class BoardHandler {
 
     }
 
-    private boolean isAvailableCell(int x, int y) {
-        return cellExists(x, y) && cellIsEmpty(x, y);
+    private boolean isAvailableCell(int i, int j) {
+        return cellExists(i, j) && cellIsEmpty(i, j);
     }
 
-    private List<Disc> searchForWonDiscs(Direction direction, int i, int j, int player) {
+    public List<Disc> searchForWonDiscs(Direction direction, int i, int j, int player) {
 
         int dx;
         int dy;
@@ -196,13 +198,17 @@ public class BoardHandler {
             if (hasCell(i, j, opponent))
                 discs.add(new Disc(i, j, opponent));
             else { // player has cell or it is empty we do not have to search further
-                if (hasCell(i, j, 0))
+                if (cellIsEmpty(i,j))
                     discs.clear(); // if the cell was empty we clear the discs (no discs were won)
                 break;
             }
             i += dx;
             j += dy;
         }
+
+        if (!(i >= 0 && i < SIZE && j >= 0 && j < SIZE))
+            discs.clear();
+        
         return Collections.unmodifiableList(discs);
     }
 
@@ -219,16 +225,16 @@ public class BoardHandler {
     }
 
 
-    private void setDisc(int x, int y, int player) {
-        boardGrid[x][y] = player;
+    private void setDisc(int i, int j, int player) {
+        boardGrid[i][j] = player;
     }
 
-    private boolean cellExists(int x, int y) {
-        return !(x < 0 || x > SIZE - 1 || y < 0 || y > SIZE - 1);
+    private boolean cellExists(int i, int j) {
+        return !(i < 0 || i > SIZE - 1 || j < 0 || j > SIZE - 1);
     }
 
-    private boolean cellIsEmpty(int x, int y) {
-        return boardGrid[x][y] == 0;
+    private boolean cellIsEmpty(int i, int j) {
+        return boardGrid[i][j] == 0;
     }
 
     public String toString() {
