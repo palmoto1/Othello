@@ -13,7 +13,7 @@ public class Evaluator {
     private static final int HARD = 3;
 
     private final BoardHandler boardHandler;
-    private HashMap<Plane, HashSet<Disc>> planeStableDiscsMap;
+    private HashMap<Plane, HashSet<Disc>> discsStableInPlanes;
 
     public Evaluator(BoardHandler bh) {
         boardHandler = bh;
@@ -27,18 +27,25 @@ public class Evaluator {
             case MEDIUM:
                 return evaluateParity();
             case HARD:
-                return evaluateParity() + evaluateMobility() + evaluateCornerValue();
+                return evaluateStability();
+               // return evaluateParity() + evaluateMobility() + evaluateCornerValue();
             default:
                 break;
         }
         throw new IllegalStateException();
     }
 
-    private int evaluateStability(int player) {
+    private int evaluateStability() {
         if (allCornersCellsEmpty())
             return 0;
 
-        return -1;
+        int maxPlayerStability = evaluateStability(MAX_PLAYER);
+        int minPlayerStability = evaluateStability(MIN_PLAYER);
+
+        if (maxPlayerStability + minPlayerStability == 0)
+            return 0;
+
+        return 100 * (maxPlayerStability - minPlayerStability) / (maxPlayerStability + minPlayerStability);
     }
 
     private int evaluateParity() {
@@ -116,17 +123,20 @@ public class Evaluator {
         return staticMaxValue;
     }
 
-    // messy, can be made prettier
+
     private enum Plane {
         HORIZONTAL, VERTICAL, DIAGONAL_LEFT_DOWN_RIGHT_UP, DIAGONAL_LEFT_UP_RIGHT_DOWN
     }
 
-    private int evaluateDiscStability(int player) {
+    // messy, can be made prettier
+    // TODO: can also be easy optimized further by checking stable neighbours in all planes
 
-        planeStableDiscsMap = new HashMap<>();
+    private int evaluateStability (int player) {
+
+        discsStableInPlanes = new HashMap<>();
 
         for (Plane plane : Plane.values())
-            planeStableDiscsMap.put(plane, new HashSet<>());
+            discsStableInPlanes.put(plane, new HashSet<>());
 
         List<Disc> allDiscs = boardHandler.getAllDiscs(player);
 
@@ -138,10 +148,10 @@ public class Evaluator {
                 continue;
             }
 
-            boolean horizontal = planeStableDiscsMap.get(Plane.HORIZONTAL).contains(disc);
-            boolean vertical = planeStableDiscsMap.get(Plane.VERTICAL).contains(disc);
-            boolean diagonalLeftDownRightUp = planeStableDiscsMap.get(Plane.DIAGONAL_LEFT_DOWN_RIGHT_UP).contains(disc);
-            boolean diagonalLeftUpRightDown = planeStableDiscsMap.get(Plane.DIAGONAL_LEFT_UP_RIGHT_DOWN).contains(disc);
+            boolean horizontal = discsStableInPlanes.get(Plane.HORIZONTAL).contains(disc);
+            boolean vertical = discsStableInPlanes.get(Plane.VERTICAL).contains(disc);
+            boolean diagonalLeftDownRightUp = discsStableInPlanes.get(Plane.DIAGONAL_LEFT_DOWN_RIGHT_UP).contains(disc);
+            boolean diagonalLeftUpRightDown = discsStableInPlanes.get(Plane.DIAGONAL_LEFT_UP_RIGHT_DOWN).contains(disc);
 
 
             if (!horizontal)
@@ -168,7 +178,7 @@ public class Evaluator {
                 stableDiscs++;
         }
 
-        planeStableDiscsMap.clear();
+        discsStableInPlanes.clear();
         return stableDiscs;
 
     }
@@ -186,12 +196,12 @@ public class Evaluator {
                 stable = false;
                 break;
             }
-            discs.add(disc);
+            discs.add(new Disc(i, j, player));
             i += dx;
             j += dy;
         }
         if (stable)
-            planeStableDiscsMap.get(plane).addAll(discs);
+            discsStableInPlanes.get(plane).addAll(discs);
 
         return stable;
     }

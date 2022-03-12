@@ -43,5 +43,4 @@ public class Disc {
         return this.i == o.i && this.j == o.j && this.color == o.color;
     }
 
-
 }
