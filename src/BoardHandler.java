@@ -2,10 +2,6 @@ import java.util.*;
 
 public class BoardHandler {
 
-    private enum Direction {
-        LEFT, RIGHT, UP, DOWN, LEFT_UP, RIGHT_UP, LEFT_DOWN, RIGHT_DOWN
-    }
-
     private final static int SIZE = 8;
     private final static int TOTAL_CELLS = 64;
     private final static int HUMAN = 1;
@@ -70,6 +66,10 @@ public class BoardHandler {
         return moves;
     }
 
+    public int getMobility(int player){
+        return getValidMoves(player).size();
+    }
+
     public boolean hasMoves(int player) {
         return getValidMoves(player).size() > 0;
     }
@@ -131,10 +131,20 @@ public class BoardHandler {
         return count;
     }
 
+    public List<Disc> getAllDiscs(int player) {
+        List<Disc> discs = new ArrayList<>();
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++)
+                if (hasCell(i, j, player))
+                    discs.add(new Disc(i, j, player));
+        }
+        return Collections.unmodifiableList(discs);
+    }
+
     private void flipDiscs(List<Disc> discs) {
         for (Disc d : discs) {
             d.flip();
-            setDisc(d.x(), d.y(), d.color());
+            setDisc(d.i(), d.j(), d.color());
         }
 
     }
@@ -233,9 +243,11 @@ public class BoardHandler {
         return !(i < 0 || i > SIZE - 1 || j < 0 || j > SIZE - 1);
     }
 
-    private boolean cellIsEmpty(int i, int j) {
+    public boolean cellIsEmpty(int i, int j) {
         return boardGrid[i][j] == 0;
     }
+
+
 
     public String toString() {
         StringBuilder sb = new StringBuilder();

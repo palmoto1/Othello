@@ -13,9 +13,9 @@ public class Main {
             int currentPlayer = bh.hasTurn(1) ? 1 : 2;
 
             if (bh.hasTurn(1)) {
-                System.out.print("Enter x: ");
+                System.out.print("Enter i: ");
                 int x = scanner.nextInt();
-                System.out.print("Enter y: ");
+                System.out.print("Enter j: ");
                 int y = scanner.nextInt();
                 System.out.println();
                 nextMove = new Move(x, y);

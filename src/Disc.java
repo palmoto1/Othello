@@ -3,13 +3,13 @@ public class Disc {
     private final static int WHITE = 1;
     private final static int BLACK = 2;
 
-    private int x;
-    private int y;
+    private int i;
+    private int j;
     private int color;
 
-    public Disc(int x, int y, int color) {
-        this.x = x;
-        this.y = y;
+    public Disc(int i, int j, int color) {
+        this.i = i;
+        this.j = j;
         this.color = color;
     }
 
@@ -22,15 +22,26 @@ public class Disc {
         return color;
     }
 
-    public int x(){
-        return x;
+    public int i(){
+        return i;
     }
 
-    public int y(){
-        return y;
+    public int j(){
+        return j;
     }
 
     public String toString(){
-        return x() + ", " + y() + ": " + color;
+        return i() + ", " + j() + ": " + color;
     }
+
+    public boolean equals(Object other){
+        if (this == other)
+            return true;
+        if (!(other instanceof Disc))
+            return false;
+        Disc o = (Disc) other;
+        return this.i == o.i && this.j == o.j && this.color == o.color;
+    }
+
+
 }
