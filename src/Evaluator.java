@@ -1,9 +1,11 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+
+import java.util.*;
 
 public class Evaluator {
+
+    private enum Plane {
+        HORIZONTAL, VERTICAL, DIAGONAL_LEFT_DOWN_RIGHT_UP, DIAGONAL_LEFT_UP_RIGHT_DOWN
+    }
 
     private static final int MIN_PLAYER = 1;
     private static final int MAX_PLAYER = 2;
@@ -123,14 +125,6 @@ public class Evaluator {
         return staticMaxValue;
     }
 
-
-    private enum Plane {
-        HORIZONTAL, VERTICAL, DIAGONAL_LEFT_DOWN_RIGHT_UP, DIAGONAL_LEFT_UP_RIGHT_DOWN
-    }
-
-    // messy, can be made prettier
-    // TODO: can also be easy optimized further by checking stable neighbours in all planes
-
     private int evaluateStability (int player) {
 
         discsStableInPlanes = new HashMap<>();
@@ -143,6 +137,7 @@ public class Evaluator {
         int stableDiscs = 0;
         for (Disc disc : allDiscs) {
 
+            // corners are always stable
             if (cellIsCorner(disc.i(), disc.j())) {
                 stableDiscs++;
                 continue;
@@ -153,57 +148,80 @@ public class Evaluator {
             boolean diagonalLeftDownRightUp = discsStableInPlanes.get(Plane.DIAGONAL_LEFT_DOWN_RIGHT_UP).contains(disc);
             boolean diagonalLeftUpRightDown = discsStableInPlanes.get(Plane.DIAGONAL_LEFT_UP_RIGHT_DOWN).contains(disc);
 
+            if (!horizontal)
+                horizontal = stableInPlane(Plane.HORIZONTAL, Direction.LEFT, Direction.RIGHT, disc, player); // check left
 
-            if (!horizontal)
-                horizontal = stableInPlane(Plane.HORIZONTAL, disc, 0, -1, player); // check left
-            if (!horizontal)
-                horizontal = stableInPlane(Plane.HORIZONTAL, disc, 0, 1, player); // check right
 
             if (!vertical)
-                vertical = stableInPlane(Plane.VERTICAL, disc, -1, 0, player); // check up
-            if (!vertical)
-                vertical = stableInPlane(Plane.VERTICAL, disc, 1, 0, player); // check down
+                vertical = stableInPlane(Plane.VERTICAL, Direction.UP, Direction.DOWN, disc, player); // check up
+
 
             if (!diagonalLeftDownRightUp)
-                diagonalLeftDownRightUp = stableInPlane(Plane.DIAGONAL_LEFT_DOWN_RIGHT_UP, disc, 1, -1, player);
-            if (!diagonalLeftDownRightUp)
-                diagonalLeftDownRightUp = stableInPlane(Plane.DIAGONAL_LEFT_DOWN_RIGHT_UP, disc, -1, 1, player);
+                diagonalLeftDownRightUp = stableInPlane(Plane.DIAGONAL_LEFT_DOWN_RIGHT_UP,
+                        Direction.LEFT_DOWN, Direction.RIGHT_UP, disc, player);
+
 
             if (!diagonalLeftUpRightDown)
-                diagonalLeftUpRightDown = stableInPlane(Plane.DIAGONAL_LEFT_UP_RIGHT_DOWN, disc, -1, -1, player);
-            if (!diagonalLeftUpRightDown)
-                diagonalLeftUpRightDown = stableInPlane(Plane.DIAGONAL_LEFT_UP_RIGHT_DOWN, disc, 1, 1, player);
+                diagonalLeftUpRightDown = stableInPlane(Plane.DIAGONAL_LEFT_UP_RIGHT_DOWN,
+                        Direction.LEFT_UP, Direction.RIGHT_DOWN, disc, player);
 
+
+            // disc is stable in all planes then it is fully stable
             if (horizontal && vertical && diagonalLeftDownRightUp && diagonalLeftUpRightDown)
                 stableDiscs++;
         }
-
         discsStableInPlanes.clear();
         return stableDiscs;
 
     }
 
-    private boolean stableInPlane(Plane plane, Disc disc, int dx, int dy, int player) {
-        boolean stable = true;
+    private boolean stableInPlane(Plane plane, Direction a, Direction b, Disc disc, int player) {
+        boolean stable = false;
+        boolean filledRow = false;
+        int status;
+
+
+        ArrayList<Disc> discs = new ArrayList<>();
+
+        status = stableInDirection(a, disc, player, discs); // check left
+
+        if (status == 1) // row was filled with both colors in one direction
+            filledRow = true;
+
+        if (status != 0) // if row was not filled with one colored discs we have to check other direction
+            status = stableInDirection(b, disc, player, discs); // check right
+
+        // the disc is stable in the plane if it is in a filled row
+        // or/and if the row is filled with discs of the same color in one direction
+        if (status == 0 || (status == 1 && filledRow))
+            stable = true;
+
+        if (stable) // the other discs in the same row of the same color must also be stable in the plane
+            discsStableInPlanes.get(plane).addAll(discs);
+
+        return stable;
+    }
+
+    private int stableInDirection(Direction direction, Disc disc, int player, List<Disc> discs){
+        int status = 0;
 
         int i = disc.i();
         int j = disc.j();
 
-        ArrayList<Disc> discs = new ArrayList<>();
-
         while (i >= 0 && i < 8 && j >= 0 && j < 8) {
-            if (!boardHandler.hasCell(i, j, player)) {
-                stable = false;
-                break;
+            if (boardHandler.hasCell(i, j, player)) // collecting potential stable discs
+                discs.add(new Disc(i, j, player));
+            else if (boardHandler.cellIsEmpty(i, j)) { // empty cell, stability is not possible
+                discs.clear();
+                return -1;
             }
-            discs.add(new Disc(i, j, player));
-            i += dx;
-            j += dy;
-        }
-        if (stable)
-            discsStableInPlanes.get(plane).addAll(discs);
+            else //the disc is one of the opponents
+                status = 1;
 
-        return stable;
+            i += direction.dx;
+            j += direction.dy;
+        }
+        return status;
     }
 
 

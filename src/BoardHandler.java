@@ -155,54 +155,13 @@ public class BoardHandler {
 
     public List<Disc> searchForWonDiscs(Direction direction, int i, int j, int player) {
 
-        int dx;
-        int dy;
-
-        switch (direction) {
-            case LEFT:
-                dx = 0;
-                dy = -1;
-                break;
-            case RIGHT:
-                dx = 0;
-                dy = 1;
-                break;
-            case UP:
-                dx = -1;
-                dy = 0;
-                break;
-            case DOWN:
-                dx = 1;
-                dy = 0;
-                break;
-            case LEFT_DOWN:
-                dx = 1;
-                dy = -1;
-                break;
-            case LEFT_UP:
-                dx = -1;
-                dy = -1;
-                break;
-            case RIGHT_DOWN:
-                dx = 1;
-                dy = 1;
-                break;
-            case RIGHT_UP:
-                dx = -1;
-                dy = 1;
-                break;
-            default:
-                dx = dy = 0;
-        }
-
-
         int opponent = player == AI ? HUMAN : AI;
 
         List<Disc> discs = new ArrayList<>();
 
         //skip the cell we already stand on
-        i+=dx;
-        j+=dy;
+        i+=direction.dx;
+        j+=direction.dy;
 
         while (i >= 0 && i < SIZE && j >= 0 && j < SIZE) {
             if (hasCell(i, j, opponent))
@@ -212,8 +171,8 @@ public class BoardHandler {
                     discs.clear(); // if the cell was empty we clear the discs (no discs were won)
                 break;
             }
-            i += dx;
-            j += dy;
+            i += direction.dx;
+            j += direction.dy;
         }
 
         if (!(i >= 0 && i < SIZE && j >= 0 && j < SIZE))

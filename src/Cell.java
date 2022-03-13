@@ -7,4 +7,5 @@ public class Cell {
         this.x = x;
         this.y = y;
     }
+
 }
