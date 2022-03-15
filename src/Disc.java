@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class Disc {
 
     private final static int WHITE = 1;
@@ -34,6 +36,7 @@ public class Disc {
         return i() + ", " + j() + ": " + color;
     }
 
+    @Override
     public boolean equals(Object other){
         if (this == other)
             return true;
@@ -41,6 +44,15 @@ public class Disc {
             return false;
         Disc o = (Disc) other;
         return this.i == o.i && this.j == o.j && this.color == o.color;
+    }
+
+    @Override
+    public int hashCode() {
+        int primeNumber = 17;
+        primeNumber = 31 * primeNumber + i;
+        primeNumber = 31 * primeNumber + j;
+        primeNumber = 31 * primeNumber + color;
+        return primeNumber;
     }
 
 
