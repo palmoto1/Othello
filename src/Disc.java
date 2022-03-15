@@ -3,8 +3,8 @@ public class Disc {
     private final static int WHITE = 1;
     private final static int BLACK = 2;
 
-    private int i;
-    private int j;
+    private final int i;
+    private final int j;
     private int color;
 
     public Disc(int i, int j, int color) {
@@ -42,5 +42,6 @@ public class Disc {
         Disc o = (Disc) other;
         return this.i == o.i && this.j == o.j && this.color == o.color;
     }
+
 
 }

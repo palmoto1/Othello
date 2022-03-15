@@ -18,7 +18,7 @@ public class Main {
                 System.out.print("Enter j: ");
                 int y = scanner.nextInt();
                 System.out.println();
-                nextMove = new Move(x, y);
+                nextMove = new Move(x-1, y-1);
             } else {
                 ai.setNextMove();
                 nextMove = ai.getNextMove();

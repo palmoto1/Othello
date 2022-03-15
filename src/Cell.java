@@ -1,3 +1,4 @@
+
 public class Cell {
 
     int x;
