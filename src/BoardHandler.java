@@ -4,8 +4,8 @@ public class BoardHandler {
 
     private final static int SIZE = 8;
     private final static int TOTAL_CELLS = 64;
-    private final static int HUMAN = 1;
-    private final static int AI = 2;
+    private final int playerOne;
+    private final int playerTwo;
     private final int[][] boardGrid;
     private int noOfDiscs = 0;
 
@@ -13,11 +13,13 @@ public class BoardHandler {
     private int currentOpponent;
 
 
-    public BoardHandler() {
+    public BoardHandler(int playerOneID, int playerTwoID) {
         boardGrid = new int[SIZE][SIZE];
         initializeBoard();
-        currentPlayer = AI;
-        currentOpponent = HUMAN;
+        playerOne = playerOneID;
+        playerTwo = playerTwoID;
+        currentPlayer = playerTwo;
+        currentOpponent = playerOne;
     }
 
     private void initializeBoard() {
@@ -40,7 +42,7 @@ public class BoardHandler {
 
     //
     public int getPoints(int player) {
-        if (player == HUMAN || player == AI)
+        if (player == playerOne || player == playerTwo)
             return countDiscs(player);
         throw new IllegalArgumentException();
     }
@@ -90,7 +92,7 @@ public class BoardHandler {
 
     // evaluator class
     public int getPointsDifference(int player) {
-        int other = (player == AI) ? HUMAN : AI;
+        int other = (player == playerTwo) ? playerOne : playerTwo;
         return getPoints(player) - getPoints(other);
     }
 
@@ -102,12 +104,12 @@ public class BoardHandler {
 
     //game class
     public void changeTurn() {
-        if (currentPlayer == HUMAN) {
-            currentPlayer = AI;
-            currentOpponent = HUMAN;
+        if (currentPlayer == playerOne) {
+            currentPlayer = playerTwo;
+            currentOpponent = playerOne;
         } else {
-            currentPlayer = HUMAN;
-            currentOpponent = AI;
+            currentPlayer = playerOne;
+            currentOpponent = playerTwo;
         }
     }
 
@@ -118,7 +120,7 @@ public class BoardHandler {
 
     // game/evaluator class
     public boolean gameOver() {
-        return !hasMoves(HUMAN) && !hasMoves(AI);
+        return !hasMoves(playerOne) && !hasMoves(playerTwo);
     }
 
     private int countDiscs(int player) {
@@ -155,7 +157,7 @@ public class BoardHandler {
 
     public List<Disc> searchForWonDiscs(Direction direction, int i, int j, int player) {
 
-        int opponent = player == AI ? HUMAN : AI;
+        int opponent = player == playerTwo ? playerOne : playerTwo;
 
         List<Disc> discs = new ArrayList<>();
 

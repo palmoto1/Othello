@@ -2,20 +2,24 @@ import java.util.List;
 
 public class AI {
 
-    private static final int MIN_PLAYER = 1;
-    private static final int MAX_PLAYER = 2;
+
     private static final int SEARCH_DEPTH = 5;
 
     private final BoardHandler boardHandler;
     private final Evaluator evaluator;
-    private int difficulty;
+    private final int minPlayerID;
+    private final int maxPlayerID;
+    private final int difficulty;
+
     private Move nextMove;
 
 
-    public AI(BoardHandler boardHandler, int difficulty){
+    public AI(BoardHandler boardHandler, int difficulty, int minPlayerID, int maxPlayerID){
         this.boardHandler = boardHandler;
         this.difficulty = difficulty;
-        evaluator = new Evaluator(boardHandler);
+        this.minPlayerID = minPlayerID;
+        this.maxPlayerID = maxPlayerID;
+        evaluator = new Evaluator(boardHandler, minPlayerID, maxPlayerID);
     }
 
     public Move getNextMove() {
@@ -23,7 +27,7 @@ public class AI {
     }
 
     public void setNextMove(){
-        searchNextOptimalMove(SEARCH_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, MAX_PLAYER);
+        searchNextOptimalMove(SEARCH_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, maxPlayerID);
     }
 
     private int searchNextOptimalMove(int depth, int alpha, int beta, int player) {
@@ -34,18 +38,16 @@ public class AI {
             int bestEvaluation;
             int nextPlayer;
 
-            if (player == MAX_PLAYER) {
-                validMoves = boardHandler.getValidMoves(MAX_PLAYER);
+            if (player == maxPlayerID) {
+                validMoves = boardHandler.getValidMoves(maxPlayerID);
                 bestEvaluation = Integer.MIN_VALUE;
-                nextPlayer = MIN_PLAYER;
+                nextPlayer = minPlayerID;
             } else {
-                validMoves = boardHandler.getValidMoves(MIN_PLAYER);
+                validMoves = boardHandler.getValidMoves(minPlayerID);
                 bestEvaluation = Integer.MAX_VALUE;
-                nextPlayer = MAX_PLAYER;
+                nextPlayer = maxPlayerID;
             }
 
-            if (validMoves.isEmpty())
-                System.out.println("Its empty");
             Move optimal = null; // choosing the first move as default optimal value
 
             // loop through all valid moves
@@ -57,7 +59,7 @@ public class AI {
 
                 boardHandler.doMove(move, 0); // undo the move so it dont affect the actual game
 
-                if (player == MAX_PLAYER) {
+                if (player == maxPlayerID) {
                     alpha = Math.max(alpha, evaluation); // update alpha
                     if (evaluation > bestEvaluation) {
                         bestEvaluation = evaluation;
