@@ -50,7 +50,7 @@ public class Main {
 
     private void runLoop() throws PlayerException, MoveException {
         boolean gameOver = false;
-        AI ai = new AI(boardHandler, difficulty, 1, 2);
+        AI ai = new AI(boardHandler, difficulty, HUMAN_PLAYER, COMPUTER);
 
         Move nextMove;
         printScore();
@@ -61,7 +61,7 @@ public class Main {
                 System.out.print("Enter row: ");
                 int i = scanner.nextInt();
                 System.out.print("Enter column: ");
-                int j = scanner.nextChar();
+                int j = scanner.nextColumn();
                 System.out.println(i + " " + j);
                 nextMove = new Move(i-1, j);
             } else {
@@ -126,13 +126,13 @@ public class Main {
                 ai1.setNextMove();
                 nextMove = ai1.getNextMove();
                 if (nextMove != null)
-                    System.out.print("AI1 choose cell: " + nextMove.i() + " " + nextMove.j());
+                    System.out.print("AI1 choose cell: " + nextMove.row() + " " + nextMove.column());
                 else System.out.println("AI1 has no move");
             } else {
                 ai2.setNextMove();
                 nextMove = ai2.getNextMove();
                 if (nextMove != null)
-                    System.out.print("AI2 choose cell: " + nextMove.i() + " " + nextMove.j());
+                    System.out.print("AI2 choose cell: " + nextMove.row() + " " + nextMove.column());
                 else System.out.println("AI2 has no move");
             }
             System.out.println();

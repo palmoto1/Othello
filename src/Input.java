@@ -1,5 +1,4 @@
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 
 public class Input {
 
@@ -30,7 +29,7 @@ public class Input {
         }
     }
 
-    public int nextChar() {
+    public int nextColumn() {
         String in = scanner.nextLine().toUpperCase();
         if (isColumnID(in))
             return columnID.get(in);

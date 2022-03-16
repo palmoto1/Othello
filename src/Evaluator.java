@@ -117,7 +117,7 @@ public class Evaluator {
 
 
         for (Disc disc : discs)
-            staticMaxValue += staticWeights[disc.i()][disc.j()];
+            staticMaxValue += staticWeights[disc.row()][disc.column()];
 
         return staticMaxValue;
     }
@@ -135,7 +135,7 @@ public class Evaluator {
         int stableDiscs = 0;
         for (Disc disc : allDiscs) {
             // corners are always stable
-            if (cellIsCorner(disc.i(), disc.j())) {
+            if (cellIsCorner(disc.row(), disc.column())) {
                 stableDiscs++;
                 continue;
             }
@@ -205,8 +205,8 @@ public class Evaluator {
     private DiscState stableInDirection(Direction direction, Disc disc, int player, List<Disc> discs) throws PlayerException {
         DiscState state = DiscState.STABLE;
 
-        int i = disc.i();
-        int j = disc.j();
+        int i = disc.row();
+        int j = disc.column();
 
         while (i >= 0 && i < 8 && j >= 0 && j < 8) {
             if (boardHandler.hasCell(i, j, player)) // collecting potential stable discs
@@ -225,8 +225,8 @@ public class Evaluator {
 
     private void addAdjacentDiscs(Direction direction, Disc disc, int player, List<Disc> discs) throws PlayerException {
 
-        int i = disc.i() + direction.dx;;
-        int j = disc.j() + direction.dy;;
+        int i = disc.row() + direction.dx;;
+        int j = disc.column() + direction.dy;;
 
         while (i >= 0 && i < 8 && j >= 0 && j < 8) {
             if (boardHandler.hasCell(i, j, player))
@@ -254,118 +254,3 @@ public class Evaluator {
     }
 
 }
-
-
-//TODO: Maybe can be more optimized, can only check one
-//   direction and if it is unstable then continue (check if it is better)
-   /* private int evaluateStability(int player) {
-
-        stableDiscMap = new HashMap<>();
-
-
-        List<Disc> allDiscs = boardHandler.getAllDiscs(player);
-
-        for (Disc disc : allDiscs){
-            stableDiscMap.put(disc, new HashMap<>());
-            for(Plane plane : Plane.values()) {
-                stableDiscMap.get(disc).put(plane, DiscState.UNSTABLE);
-            }
-        }
-
-        int stableDiscs = 0;
-        for (Disc disc : allDiscs) {
-
-            // corners are always stable
-            if (cellIsCorner(disc.i(), disc.j())) {
-                stableDiscs++;
-                continue;
-            }
-
-            DiscState horizontal = stableDiscMap.get(disc).get(Plane.HORIZONTAL);
-            DiscState vertical  = stableDiscMap.get(disc).get(Plane.VERTICAL);
-            DiscState diagonalLeftDownRightUp = stableDiscMap.get(disc).get(Plane.DIAGONAL_LEFT_DOWN_RIGHT_UP);
-            DiscState diagonalLeftUpRightDown = stableDiscMap.get(disc).get(Plane.DIAGONAL_LEFT_UP_RIGHT_DOWN);
-
-            if (horizontal == DiscState.UNSTABLE)
-                 horizontal = stableInPlane(Plane.HORIZONTAL, Direction.LEFT, Direction.RIGHT, disc, player); // check left
-
-            if (horizontal == DiscState.UNSTABLE)
-                continue;
-
-
-            if (vertical == DiscState.UNSTABLE)
-                vertical = stableInPlane(Plane.VERTICAL, Direction.UP, Direction.DOWN, disc, player); // check up
-
-
-            if (vertical == DiscState.UNSTABLE)
-                continue;
-
-            if (diagonalLeftDownRightUp == DiscState.UNSTABLE)
-                diagonalLeftDownRightUp = stableInPlane(Plane.DIAGONAL_LEFT_DOWN_RIGHT_UP,
-                        Direction.LEFT_DOWN, Direction.RIGHT_UP, disc, player);
-
-            if (diagonalLeftDownRightUp == DiscState.UNSTABLE)
-                continue;
-
-            if (diagonalLeftUpRightDown == DiscState.UNSTABLE)
-                diagonalLeftUpRightDown = stableInPlane(Plane.DIAGONAL_LEFT_UP_RIGHT_DOWN,
-                         Direction.LEFT_UP, Direction.RIGHT_DOWN, disc, player);
-
-            // disc is stable in all planes then it is fully stable
-            if (horizontal == DiscState.STABLE && vertical == DiscState.STABLE &&
-                    diagonalLeftDownRightUp == DiscState.STABLE && diagonalLeftUpRightDown == DiscState.STABLE)
-                stableDiscs++;
-        }
-
-        stableDiscMap.clear();
-        return stableDiscs;
-
-    }*/
-
-   /* private DiscState stableInPlane(Plane plane, Direction a, Direction b, Disc disc, int player) {
-        DiscState state;
-        boolean filledRow = false;
-
-        ArrayList<Disc> discs = new ArrayList<>();
-        state = stableInDirection(a, disc, player, discs); // check left
-
-        if (state == DiscState.PENDING) // row was filled with both colors in one direction
-            filledRow = true;
-
-        if (state != DiscState.STABLE) { // if row was not filled with one colored discs we have to check other direction
-            state = stableInDirection(b, disc, player, discs); // check right
-        }
-        // the disc is stable in the plane if it is in a filled row
-        // or/and if the row is filled with discs of the same color in one direction
-        if (state == DiscState.STABLE || (state == DiscState.PENDING && filledRow))
-            state = DiscState.STABLE;
-
-        for (Disc d : discs){
-            if (state == DiscState.STABLE)
-                stableDiscMap.get(d).putIfAbsent(plane, DiscState.STABLE);
-        }
-
-
-        return state;
-    }*/
-
-  /*  private DiscState stableInDirection(Direction direction, Disc disc, int player, List<Disc> discs) {
-        DiscState state = DiscState.STABLE;
-
-        int i = disc.i();
-        int j = disc.j();
-
-        while (i >= 0 && i < 8 && j >= 0 && j < 8) {
-            if (boardHandler.hasCell(i, j, player)) // collecting potential stable discs
-                discs.add(new Disc(i, j, player)); //dont add doubles (maybe does not matter)
-            else if (boardHandler.cellIsEmpty(i, j)) { // empty cell, stability is not possible
-                discs.clear();
-                return DiscState.UNSTABLE;
-            } else //the disc is one of the opponents
-                state = DiscState.PENDING;
-
-            i += direction.dx;
-            j += direction.dy;
-        }
-        return state;
-    }*/

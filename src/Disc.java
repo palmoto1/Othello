@@ -5,13 +5,13 @@ public class Disc {
     private final static int WHITE = 1;
     private final static int BLACK = 2;
 
-    private final int i;
-    private final int j;
+    private final int row;
+    private final int column;
     private int color;
 
-    public Disc(int i, int j, int color) {
-        this.i = i;
-        this.j = j;
+    public Disc(int row, int column, int color) {
+        this.row = row;
+        this.column = column;
         this.color = color;
     }
 
@@ -24,16 +24,16 @@ public class Disc {
         return color;
     }
 
-    public int i(){
-        return i;
+    public int row(){
+        return row;
     }
 
-    public int j(){
-        return j;
+    public int column(){
+        return column;
     }
 
     public String toString(){
-        return i() + ", " + j() + ": " + color;
+        return row() + ", " + column() + ": " + color;
     }
 
     @Override
@@ -43,14 +43,14 @@ public class Disc {
         if (!(other instanceof Disc))
             return false;
         Disc o = (Disc) other;
-        return this.i == o.i && this.j == o.j && this.color == o.color;
+        return this.row == o.row && this.column == o.column && this.color == o.color;
     }
 
     @Override
     public int hashCode() {
         int primeNumber = 17;
-        primeNumber = 31 * primeNumber + i;
-        primeNumber = 31 * primeNumber + j;
+        primeNumber = 31 * primeNumber + row;
+        primeNumber = 31 * primeNumber + column;
         primeNumber = 31 * primeNumber + color;
         return primeNumber;
     }

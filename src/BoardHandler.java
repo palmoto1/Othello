@@ -83,8 +83,8 @@ public class BoardHandler {
         if (!isValidPlayerID(player))
             throw new PlayerException("Not a valid player ID");
 
-        if (isAvailableCell(move.i(), move.j())) {
-            List<Disc> wonDiscs = wonDiscs(move.i(), move.j(), player);
+        if (isAvailableCell(move.row(), move.column())) {
+            List<Disc> wonDiscs = wonDiscs(move.row(), move.column(), player);
             if (!wonDiscs.isEmpty()) {
                 move.setWonDiscs(wonDiscs);
                 doMove(move, player);
@@ -100,7 +100,7 @@ public class BoardHandler {
         if (!isValidPlayerID(player))
             throw new PlayerException("Not a valid player ID");
 
-        setDisc(move.i(), move.j(), player);
+        setDisc(move.row(), move.column(), player);
         flipDiscs(move.getWonDiscs());
     }
 
@@ -153,7 +153,7 @@ public class BoardHandler {
     private void flipDiscs(List<Disc> discs) {
         for (Disc d : discs) {
             d.flip();
-            setDisc(d.i(), d.j(), d.color());
+            setDisc(d.row(), d.column(), d.color());
         }
 
     }

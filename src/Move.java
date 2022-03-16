@@ -2,13 +2,13 @@ import java.util.*;
 
 public class Move {
 
-    private int i;
-    private int j;
+    private int row;
+    private int column;
     private List<Disc> wonDiscs;
 
-    public Move(int i, int j, List<Disc> wonDiscs) {
-        this.i = i;
-        this.j = j;
+    public Move(int row, int column, List<Disc> wonDiscs) {
+        this.row = row;
+        this.column = column;
         this.wonDiscs = wonDiscs;
     }
 
@@ -16,12 +16,12 @@ public class Move {
         this(i, j, null);
     }
 
-    public int i() {
-        return i;
+    public int row() {
+        return row;
     }
 
-    public int j() {
-        return j;
+    public int column() {
+        return column;
     }
 
     public List<Disc> getWonDiscs() {
