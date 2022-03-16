@@ -2,29 +2,35 @@ import java.util.*;
 
 public class Move {
 
-    private int x;
-    private int y;
+    private int i;
+    private int j;
     private List<Disc> wonDiscs;
 
-    public Move(int x, int y, List<Disc> wonDiscs) {
-        this.x = x;
-        this.y = y;
+    public Move(int i, int j, List<Disc> wonDiscs) {
+        this.i = i;
+        this.j = j;
         this.wonDiscs = wonDiscs;
     }
 
-    public Move(int x, int y) {
-        this(x, y, null);
+    public Move(int i, int j) {
+        this(i, j, null);
     }
 
-    public int x() {
-        return x;
+    public int i() {
+        return i;
     }
 
-    public int y() {
-        return y;
+    public int j() {
+        return j;
     }
 
     public List<Disc> getWonDiscs() {
         return Collections.unmodifiableList(wonDiscs);
+    }
+
+    public void setWonDiscs(List<Disc> wonDiscs) throws IllegalArgumentException {
+        if (wonDiscs == null)
+            throw new IllegalArgumentException();
+        this.wonDiscs = wonDiscs;
     }
 }

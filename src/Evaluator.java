@@ -27,7 +27,7 @@ public class Evaluator {
         boardHandler = bh;
     }
 
-    public int getEvaluation(int difficulty) {
+    public int getEvaluation(int difficulty) throws PlayerException {
 
         switch (difficulty) {
             case EASY:
@@ -40,10 +40,10 @@ public class Evaluator {
             default:
                 break;
         }
-        throw new IllegalStateException();
+        throw new IllegalArgumentException("Wrong number");
     }
 
-    public int evaluateStability() {
+    public int evaluateStability() throws PlayerException {
         if (allCornersCellsEmpty())
             return evaluateMobility();
 
@@ -53,14 +53,14 @@ public class Evaluator {
         return 100 * (maxPlayerStability - minPlayerStability);
     }
 
-    public int evaluateParity() {
+    public int evaluateParity() throws PlayerException {
         int maxPlayerCoins = boardHandler.getPoints(maxPlayerID);
         int minPlayerCoins = boardHandler.getPoints(minPlayerID);
 
         return 100 * (maxPlayerCoins - minPlayerCoins);
     }
 
-    public int evaluateMobility() {
+    public int evaluateMobility() throws PlayerException {
         int maxPlayerMobility = boardHandler.getMobility(maxPlayerID);
         int minPlayerMobility = boardHandler.getMobility(minPlayerID);
 
@@ -68,7 +68,7 @@ public class Evaluator {
         return 100 * (maxPlayerMobility - minPlayerMobility);
     }
 
-    public int evaluateCornerValue() {
+    public int evaluateCornerValue() throws PlayerException {
         int maxPlayerCornerValue = evaluateCornerValue(maxPlayerID);
         int minPlayerCornerValue = evaluateCornerValue(minPlayerID);
 
@@ -76,7 +76,7 @@ public class Evaluator {
         return 100 * (maxPlayerCornerValue - minPlayerCornerValue);
     }
 
-    public int evaluateCornerValue(int player) {
+    public int evaluateCornerValue(int player) throws PlayerException {
         int capturedCorners = 0;
 
         for (int i = 0, j = 0; j < 8; j += 7) {
@@ -92,7 +92,7 @@ public class Evaluator {
         return capturedCorners;
     }
 
-    public int evaluateStaticWeight() {
+    public int evaluateStaticWeight() throws PlayerException {
         int maxStaticWeight = evaluateStaticWeight(maxPlayerID);
         int minStaticWeight = evaluateStaticWeight(minPlayerID);
 
@@ -100,7 +100,7 @@ public class Evaluator {
         return 100 * (maxStaticWeight - minStaticWeight);
     }
 
-    public int evaluateStaticWeight(int player) {
+    public int evaluateStaticWeight(int player) throws PlayerException {
         int[][] staticWeights = {
                 {20, -15, 10, 10, 10, 10, -15, 20},
                 {-15, -20, -5, -5, -5, -5, -20, -15},
@@ -123,7 +123,7 @@ public class Evaluator {
     }
 
 
-    public int evaluateStability(int player) {
+    public int evaluateStability(int player) throws PlayerException {
 
         discsStableInPlaneMap = new HashMap<>();
 
@@ -171,7 +171,7 @@ public class Evaluator {
 
     }
 
-    private boolean stableInPlane(Plane plane, Direction directionA, Direction directionB, Disc disc, int player) {
+    private boolean stableInPlane(Plane plane, Direction directionA, Direction directionB, Disc disc, int player) throws PlayerException {
         boolean setStable = false;
         boolean filledRow = false;
         DiscState state;
@@ -202,7 +202,7 @@ public class Evaluator {
         return setStable;
     }
 
-    private DiscState stableInDirection(Direction direction, Disc disc, int player, List<Disc> discs) {
+    private DiscState stableInDirection(Direction direction, Disc disc, int player, List<Disc> discs) throws PlayerException {
         DiscState state = DiscState.STABLE;
 
         int i = disc.i();
@@ -223,7 +223,7 @@ public class Evaluator {
         return state;
     }
 
-    private void addAdjacentDiscs(Direction direction, Disc disc, int player, List<Disc> discs){
+    private void addAdjacentDiscs(Direction direction, Disc disc, int player, List<Disc> discs) throws PlayerException {
 
         int i = disc.i() + direction.dx;;
         int j = disc.j() + direction.dy;;

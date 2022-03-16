@@ -7,6 +7,7 @@ public class AI {
 
     private final BoardHandler boardHandler;
     private final Evaluator evaluator;
+
     private final int minPlayerID;
     private final int maxPlayerID;
     private final int difficulty;
@@ -26,11 +27,11 @@ public class AI {
         return nextMove;
     }
 
-    public void setNextMove(){
+    public void setNextMove() throws MoveException, PlayerException {
         searchNextOptimalMove(SEARCH_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, maxPlayerID);
     }
 
-    private int searchNextOptimalMove(int depth, int alpha, int beta, int player) {
+    private int searchNextOptimalMove(int depth, int alpha, int beta, int player) throws PlayerException, MoveException {
         if (depth > 0 && !boardHandler.gameOver()) {
 
             List<Move> validMoves;

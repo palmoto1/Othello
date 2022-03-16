@@ -2,20 +2,18 @@ import java.util.*;
 
 public class BoardHandler {
 
+    private final static String TOP = "ABCDEFGH";
     private final static int SIZE = 8;
-    private final static int TOTAL_CELLS = 64;
 
     private final int playerOne;
     private final int playerTwo;
 
     private int[][] boardGrid;
-    private int noOfDiscs = 0;
 
     private int currentPlayer;
 
 
     public BoardHandler(int playerOneID, int playerTwoID) {
-
         initializeBoard();
         playerOne = playerOneID;
         playerTwo = playerTwoID;
@@ -36,23 +34,25 @@ public class BoardHandler {
     }
 
     // game class
-    public boolean hasTurn(int player) {
-        return currentPlayer == player;
+    public boolean hasTurn(int player) throws PlayerException {
+        if (isValidPlayerID(player))
+            return currentPlayer == player;
+
+        throw new PlayerException("Not a valid player ID");
     }
 
     //
-    public int getPoints(int player) {
-        if (player == playerOne || player == playerTwo)
+    public int getPoints(int player) throws PlayerException {
+        if (isValidPlayerID(player))
             return countDiscs(player);
-        throw new IllegalArgumentException();
-    }
 
-    public int getTotalDiscs() {
-        return TOTAL_CELLS - noOfDiscs;
+        throw new PlayerException("Not a valid player ID");
     }
 
 
-    public List<Move> getValidMoves(int player) {
+    public List<Move> getValidMoves(int player) throws PlayerException {
+        if (!isValidPlayerID(player))
+            throw new PlayerException("Not a valid player ID");
         List<Move> moves = new ArrayList<>();
         List<Disc> wonDiscs;
 
@@ -65,41 +65,43 @@ public class BoardHandler {
                 }
             }
         }
-        return moves;
+        return Collections.unmodifiableList(moves);
     }
 
-    public int getMobility(int player){
+    public int getMobility(int player) throws PlayerException {
         return getValidMoves(player).size();
     }
 
-    public boolean hasMoves(int player) {
+    public boolean hasMoves(int player) throws PlayerException {
         return getValidMoves(player).size() > 0;
     }
 
-    //Should take a Move as param instead
-    public boolean makeMove(int i, int j, int player) {
-        if (isAvailableCell(i, j)) {
-            List<Disc> wonDiscs = wonDiscs(i, j, player);
+
+    public boolean makeMove(Move move, int player) throws MoveException, PlayerException {
+        if (move == null)
+            throw new MoveException("Move is null");
+        if (!isValidPlayerID(player))
+            throw new PlayerException("Not a valid player ID");
+
+        if (isAvailableCell(move.i(), move.j())) {
+            List<Disc> wonDiscs = wonDiscs(move.i(), move.j(), player);
             if (!wonDiscs.isEmpty()) {
-                doMove(new Move(i, j, wonDiscs), player);
+                move.setWonDiscs(wonDiscs);
+                doMove(move, player);
                 return true;
-                //changeTurn();
             }
         }
         return false;
     }
 
+    public void doMove(Move move, int player) throws MoveException, PlayerException {
+        if (move == null)
+            throw new MoveException("Move is null");
+        if (!isValidPlayerID(player))
+            throw new PlayerException("Not a valid player ID");
 
-    // evaluator class
-    public int getPointsDifference(int player) {
-        int other = (player == playerTwo) ? playerOne : playerTwo;
-        return getPoints(player) - getPoints(other);
-    }
-
-    public void doMove(Move move, int player) {
-        setDisc(move.x(), move.y(), player);
+        setDisc(move.i(), move.j(), player);
         flipDiscs(move.getWonDiscs());
-        noOfDiscs++;
     }
 
     //game class
@@ -111,17 +113,24 @@ public class BoardHandler {
         }
     }
 
-    public boolean hasCell(int i, int j, int player) {
-        return boardGrid[i][j] == player;
+    public boolean hasCell(int i, int j, int player) throws PlayerException {
+        if (!isValidPlayerID(player))
+            throw new PlayerException("Not a valid player ID");
+        try {
+            return boardGrid[i][j] == player;
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("Not a valid row/column");
+            return false;
+        }
     }
 
 
     // game/evaluator class
-    public boolean gameOver() {
+    public boolean gameOver() throws PlayerException {
         return !hasMoves(playerOne) && !hasMoves(playerTwo);
     }
 
-    private int countDiscs(int player) {
+    private int countDiscs(int player) throws PlayerException {
         int count = 0;
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++)
@@ -131,7 +140,7 @@ public class BoardHandler {
         return count;
     }
 
-    public List<Disc> getAllDiscs(int player) {
+    public List<Disc> getAllDiscs(int player) throws PlayerException {
         List<Disc> discs = new ArrayList<>();
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++)
@@ -153,21 +162,21 @@ public class BoardHandler {
         return cellExists(i, j) && cellIsEmpty(i, j);
     }
 
-    public List<Disc> searchForWonDiscs(Direction direction, int i, int j, int player) {
+    private List<Disc> searchForWonDiscs(Direction direction, int i, int j, int player) throws PlayerException {
 
         int opponent = player == playerTwo ? playerOne : playerTwo;
 
         List<Disc> discs = new ArrayList<>();
 
         //skip the cell we already stand on
-        i+=direction.dx;
-        j+=direction.dy;
+        i += direction.dx;
+        j += direction.dy;
 
         while (i >= 0 && i < SIZE && j >= 0 && j < SIZE) {
             if (hasCell(i, j, opponent))
                 discs.add(new Disc(i, j, opponent));
             else { // player has cell or it is empty we do not have to search further
-                if (cellIsEmpty(i,j))
+                if (cellIsEmpty(i, j))
                     discs.clear(); // if the cell was empty we clear the discs (no discs were won)
                 break;
             }
@@ -177,18 +186,17 @@ public class BoardHandler {
 
         if (!(i >= 0 && i < SIZE && j >= 0 && j < SIZE))
             discs.clear();
-        
+
         return Collections.unmodifiableList(discs);
     }
 
 
-    private List<Disc> wonDiscs(int i, int j, int player) {
+    private List<Disc> wonDiscs(int i, int j, int player) throws PlayerException {
 
         List<Disc> discs = new ArrayList<>();
 
         for (Direction direction : Direction.values())
             discs.addAll(searchForWonDiscs(direction, i, j, player));
-
 
         return Collections.unmodifiableList(discs);
     }
@@ -207,10 +215,20 @@ public class BoardHandler {
     }
 
 
+    private boolean isValidPlayerID(int player) {
+        return player == playerOne || player == playerTwo || player == 0;
+    }
+
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        sb.append("    ");
+        for (int i = 0; i < TOP.length(); i++)
+            sb.append(TOP.charAt(i)).append(" ");
+        sb.append("\n");
+
         for (int i = 0; i < SIZE; i++) {
+            sb.append(i+1).append(" | ");
             for (int j = 0; j < SIZE - 1; j++) {
                 sb.append(boardGrid[i][j]).append(" ");
             }
@@ -220,7 +238,7 @@ public class BoardHandler {
     }
 
 
-    void setBoard(int[][] boardGrid){
+    void setBoard(int[][] boardGrid) {
         this.boardGrid = boardGrid;
     }
 }
