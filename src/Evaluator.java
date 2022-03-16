@@ -1,4 +1,3 @@
-
 import java.util.*;
 
 public class Evaluator {
@@ -21,7 +20,6 @@ public class Evaluator {
     private final int maxPlayerID;
 
     private HashMap<Plane, HashSet<Disc>> discsStableInPlaneMap;
-    private HashMap<Disc, HashMap<Plane, DiscState>> stableDiscMap;
 
     public Evaluator(BoardHandler bh, int minPlayerID, int maxPlayerID) {
         this.minPlayerID = minPlayerID;
@@ -45,47 +43,40 @@ public class Evaluator {
         throw new IllegalStateException();
     }
 
-    private int evaluateStability() {
+    public int evaluateStability() {
         if (allCornersCellsEmpty())
             return evaluateMobility();
 
         int maxPlayerStability = evaluateStability(maxPlayerID);
         int minPlayerStability = evaluateStability(minPlayerID);
 
-        if (maxPlayerStability + minPlayerStability == 0)
-            return 0;
-
-        return 100 * (maxPlayerStability - minPlayerStability) / (maxPlayerStability + minPlayerStability);
+        return 100 * (maxPlayerStability - minPlayerStability);
     }
 
-    private int evaluateParity() {
+    public int evaluateParity() {
         int maxPlayerCoins = boardHandler.getPoints(maxPlayerID);
         int minPlayerCoins = boardHandler.getPoints(minPlayerID);
 
-        return 100 * (maxPlayerCoins - minPlayerCoins) / (maxPlayerCoins + minPlayerCoins);
+        return 100 * (maxPlayerCoins - minPlayerCoins);
     }
 
-    private int evaluateMobility() {
+    public int evaluateMobility() {
         int maxPlayerMobility = boardHandler.getMobility(maxPlayerID);
         int minPlayerMobility = boardHandler.getMobility(minPlayerID);
 
-        if (maxPlayerMobility + minPlayerMobility == 0)
-            return 0;
 
-        return 100 * (maxPlayerMobility - minPlayerMobility) / (maxPlayerMobility + minPlayerMobility);
+        return 100 * (maxPlayerMobility - minPlayerMobility);
     }
 
-    private int evaluateCornerValue() {
+    public int evaluateCornerValue() {
         int maxPlayerCornerValue = evaluateCornerValue(maxPlayerID);
         int minPlayerCornerValue = evaluateCornerValue(minPlayerID);
 
-        if (maxPlayerCornerValue + minPlayerCornerValue == 0)
-            return 0;
 
-        return 100 * (maxPlayerCornerValue - minPlayerCornerValue) / (maxPlayerCornerValue + minPlayerCornerValue);
+        return 100 * (maxPlayerCornerValue - minPlayerCornerValue);
     }
 
-    private int evaluateCornerValue(int player) {
+    public int evaluateCornerValue(int player) {
         int capturedCorners = 0;
 
         for (int i = 0, j = 0; j < 8; j += 7) {
@@ -101,17 +92,15 @@ public class Evaluator {
         return capturedCorners;
     }
 
-    private int evaluateStaticWeight() {
+    public int evaluateStaticWeight() {
         int maxStaticWeight = evaluateStaticWeight(maxPlayerID);
         int minStaticWeight = evaluateStaticWeight(minPlayerID);
 
-        if (maxStaticWeight + minStaticWeight == 0)
-            return 0;
 
-        return 100 * (maxStaticWeight - minStaticWeight) / (maxStaticWeight + minStaticWeight);
+        return 100 * (maxStaticWeight - minStaticWeight);
     }
 
-    private int evaluateStaticWeight(int player) {
+    public int evaluateStaticWeight(int player) {
         int[][] staticWeights = {
                 {20, -15, 10, 10, 10, 10, -15, 20},
                 {-15, -20, -5, -5, -5, -5, -20, -15},
@@ -123,22 +112,18 @@ public class Evaluator {
                 {20, -15, 10, 10, 10, 10, -15, 20}
         };
 
-        List<Move> validMovesMaxPlayer = boardHandler.getValidMoves(player);
+        List<Disc> discs = boardHandler.getAllDiscs(player);
         int staticMaxValue = 0;
 
 
-        for (Move move : validMovesMaxPlayer)
-            staticMaxValue += staticWeights[move.x()][move.y()];
+        for (Disc disc : discs)
+            staticMaxValue += staticWeights[disc.i()][disc.j()];
 
         return staticMaxValue;
     }
 
 
-    //TODO:
-    // write JUnit tests and check speed to see if you should have continue or not (GUI after munta)
-    // Continue debugging and check everything works all right, go through carefully
-    //
-    private int evaluateStability(int player) {
+    public int evaluateStability(int player) {
 
         discsStableInPlaneMap = new HashMap<>();
 
@@ -186,30 +171,35 @@ public class Evaluator {
 
     }
 
-    //maybe check other direction to even if stable? check if it wins time
-    private boolean stableInPlane(Plane plane, Direction a, Direction b, Disc disc, int player) {
-        boolean stable = false;
+    private boolean stableInPlane(Plane plane, Direction directionA, Direction directionB, Disc disc, int player) {
+        boolean setStable = false;
         boolean filledRow = false;
         DiscState state;
 
         ArrayList<Disc> discs = new ArrayList<>();
 
-        state = stableInDirection(a, disc, player, discs); // check left
-
-        if (state == DiscState.PENDING) // row was filled with both colors in one direction
+        state = stableInDirection(directionA, disc, player, discs);
+        if (state == DiscState.STABLE){
+            addAdjacentDiscs(directionB, disc, player, discs);
+            discsStableInPlaneMap.get(plane).addAll(discs); //need clear discs after
+            discs.clear();
+            setStable = true;
+        }
+        else if (state == DiscState.PENDING) // row was filled with both colors in one direction
             filledRow = true;
 
-        if (state != DiscState.STABLE) // if not already confirmed stable we have to check other direction
-            state = stableInDirection(b, disc, player, discs); // check right
+        if (state != DiscState.STABLE)
+            state = stableInDirection(directionB, disc, player, discs); // check other direction
 
-        // the disc is stable in the plane if it is in a filled row
-        // or/and if the row is filled with discs of the same color in one direction
-        if (state == DiscState.STABLE || (state == DiscState.PENDING && filledRow))
-            stable = true;
 
-        if (stable) // the other discs in the same row of the same color must also be stable in the plane
+        if (state == DiscState.STABLE || (state == DiscState.PENDING && filledRow)){
+            if (state == DiscState.STABLE && !setStable && !filledRow) // if was not setStable in first direction we want to mark potential adjacent discs as setStable
+                addAdjacentDiscs(directionA, disc, player, discs);
+            setStable = true;
             discsStableInPlaneMap.get(plane).addAll(discs);
-        return stable;
+        }
+
+        return setStable;
     }
 
     private DiscState stableInDirection(Direction direction, Disc disc, int player, List<Disc> discs) {
@@ -233,6 +223,22 @@ public class Evaluator {
         return state;
     }
 
+    private void addAdjacentDiscs(Direction direction, Disc disc, int player, List<Disc> discs){
+
+        int i = disc.i() + direction.dx;;
+        int j = disc.j() + direction.dy;;
+
+        while (i >= 0 && i < 8 && j >= 0 && j < 8) {
+            if (boardHandler.hasCell(i, j, player))
+                discs.add(new Disc(i, j, player));
+            else
+                break;
+            i += direction.dx;
+            j += direction.dy;
+        }
+
+    }
+
 
     private boolean cellIsCorner(int i, int j) {
         return (i == 0 && j == 0) || (i == 0 && j == 7)
@@ -241,14 +247,10 @@ public class Evaluator {
 
     private boolean allCornersCellsEmpty() {
         return
-                boardHandler.cellIsEmpty(0, 0) && boardHandler.cellIsEmpty(0, 1)
-                        && boardHandler.cellIsEmpty(1, 0) && boardHandler.cellIsEmpty(1, 1)
-                        && boardHandler.cellIsEmpty(0, 7) && boardHandler.cellIsEmpty(0, 6)
-                        && boardHandler.cellIsEmpty(1, 7) && boardHandler.cellIsEmpty(1, 6)
-                        && boardHandler.cellIsEmpty(7, 0) && boardHandler.cellIsEmpty(6, 0)
-                        && boardHandler.cellIsEmpty(7, 1) && boardHandler.cellIsEmpty(6, 1)
-                        && boardHandler.cellIsEmpty(7, 7) && boardHandler.cellIsEmpty(7, 6)
-                        && boardHandler.cellIsEmpty(6, 7) && boardHandler.cellIsEmpty(6, 6);
+                boardHandler.cellIsEmpty(0, 0)
+                        && boardHandler.cellIsEmpty(0, 7)
+                        && boardHandler.cellIsEmpty(7, 0)
+                        && boardHandler.cellIsEmpty(7, 7);
     }
 
 }

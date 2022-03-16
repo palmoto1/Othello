@@ -61,7 +61,7 @@ public class Main {
         System.out.println();
 
         Stopwatch stopwatch = new Stopwatch();
-        Stopwatch start = stopwatch.start();
+        stopwatch.start();
         while (!gameOver) {
             int currentPlayer = bh.hasTurn(1) ? 1 : 2;
 

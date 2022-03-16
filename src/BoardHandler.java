@@ -4,35 +4,35 @@ public class BoardHandler {
 
     private final static int SIZE = 8;
     private final static int TOTAL_CELLS = 64;
+
     private final int playerOne;
     private final int playerTwo;
-    private final int[][] boardGrid;
+
+    private int[][] boardGrid;
     private int noOfDiscs = 0;
 
     private int currentPlayer;
-    private int currentOpponent;
 
 
     public BoardHandler(int playerOneID, int playerTwoID) {
-        boardGrid = new int[SIZE][SIZE];
+
         initializeBoard();
         playerOne = playerOneID;
         playerTwo = playerTwoID;
         currentPlayer = playerTwo;
-        currentOpponent = playerOne;
     }
 
     private void initializeBoard() {
-
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++)
-                boardGrid[i][j] = 0;
-        }
-        boardGrid[3][3] = 1;
-        boardGrid[3][4] = 2;
-        boardGrid[4][3] = 2;
-        boardGrid[4][4] = 1;
-
+        boardGrid = new int[][]{
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 1, 2, 0, 0, 0},
+                {0, 0, 0, 2, 1, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0}
+        };
     }
 
     // game class
@@ -106,10 +106,8 @@ public class BoardHandler {
     public void changeTurn() {
         if (currentPlayer == playerOne) {
             currentPlayer = playerTwo;
-            currentOpponent = playerOne;
         } else {
             currentPlayer = playerOne;
-            currentOpponent = playerTwo;
         }
     }
 
@@ -219,5 +217,10 @@ public class BoardHandler {
             sb.append(boardGrid[i][SIZE - 1]).append("\n");
         }
         return sb.toString();
+    }
+
+
+    void setBoard(int[][] boardGrid){
+        this.boardGrid = boardGrid;
     }
 }
