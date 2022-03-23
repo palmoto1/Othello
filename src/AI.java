@@ -93,7 +93,7 @@ public class AI {
                 boardHandler.doMove(move, 0); // undo the move so it dont affect the actual game
 
                 if (player == maxPlayerID) {
-                    alpha = Math.max(alpha, evaluation); 
+                    alpha = Math.max(alpha, evaluation);
                     if (evaluation > bestEvaluation) {
                         bestEvaluation = evaluation;
                         optimal = move;

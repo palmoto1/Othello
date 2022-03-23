@@ -39,7 +39,7 @@ public class Main {
         System.out.println("Please choose difficulty level:");
         System.out.println("Easy: 1");
         System.out.println("Medium: 2");
-        System.out.println("Hard: 1\n");
+        System.out.println("Hard: 3\n");
         System.out.print("Difficulty: ");
 
         int choice = scanner.nextInt();
