@@ -1,5 +1,11 @@
 public class Main {
 
+    /**
+     * Main class handling the game
+     *
+     * @author August Johnson Palm
+     */
+
     private static final int HUMAN_PLAYER = 1;
     private static final int COMPUTER = 2;
 
@@ -111,7 +117,7 @@ public class Main {
 
 
     // for testing
-    private void AIvsAI() throws PlayerException, MoveException {
+    /*private void AIvsAI() throws PlayerException, MoveException {
         boolean gameOver = false;
         AI ai1 = new AI(boardHandler, 3, 2, 1);
         AI ai2 = new AI(boardHandler, 2, 1, 2);
@@ -155,6 +161,7 @@ public class Main {
         System.out.print("AI2 score: " + boardHandler.getPoints(2) + "\n");
         System.out.println(boardHandler.toString());
     }
+     */
 }
 
 

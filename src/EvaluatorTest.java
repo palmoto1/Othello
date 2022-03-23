@@ -1,5 +1,11 @@
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Tests for evaluations
+ *
+ * @author August Johnson Palm
+ */
 
 public class EvaluatorTest {
 

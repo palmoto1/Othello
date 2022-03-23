@@ -1,4 +1,8 @@
-import java.util.Arrays;
+/**
+ * Class representing a disc
+ *
+ * @author August Johnson Palm
+ */
 
 public class Disc {
 

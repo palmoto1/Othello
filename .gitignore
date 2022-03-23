@@ -16,3 +16,6 @@
 /out/.gitignore
 /.idea/.gitignore
 *.class
+
+/src/Cell.java
+/src/Stopwatch.java

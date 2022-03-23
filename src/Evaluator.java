@@ -1,4 +1,13 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+
+/**
+ * Class handling the evaluations for the AI
+ *
+ * @author August Johnson Palm
+ */
 
 public class Evaluator {
 
@@ -9,7 +18,6 @@ public class Evaluator {
     private enum DiscState {
         STABLE, UNSTABLE, PENDING
     }
-
 
     private static final int EASY = 1;
     private static final int MEDIUM = 2;
@@ -27,6 +35,14 @@ public class Evaluator {
         boardHandler = bh;
     }
 
+    /**
+     * Returns an evaluation depending on the set difficulty level
+     *
+     * @param difficulty the level of difficulty
+     * @return An evaluation depending on the difficulty of the game.
+     *
+     * @throws PlayerException if the param is an unvalid level number*/
+
     public int getEvaluation(int difficulty) throws PlayerException {
 
         switch (difficulty) {
@@ -43,6 +59,15 @@ public class Evaluator {
         throw new IllegalArgumentException("Wrong number");
     }
 
+    /**
+     * Calculates an evaluation based on the difference between the maxPlayer
+     * and the minPlayers stability score which is based on the number of discs that are stable
+     * for each player
+     *
+     * @return The difference between the maxPlayer and the minPlayers stability score multiplied by 100
+     *
+     * @throws PlayerException if the player IDs are unvalid*/
+
     public int evaluateStability() throws PlayerException {
         if (allCornersCellsEmpty())
             return evaluateMobility();
@@ -53,12 +78,28 @@ public class Evaluator {
         return 100 * (maxPlayerStability - minPlayerStability);
     }
 
+    /**
+     * Calculates an evaluation based on on the difference between the maxPlayer
+     * and the minPlayers parity score which is based on the number of discs of each player
+     *
+     * @return The difference between the maxPlayer and the minPlayers parity score multiplied by 100
+     *
+     * @throws PlayerException if the player IDs are unvalid*/
+
     public int evaluateParity() throws PlayerException {
         int maxPlayerCoins = boardHandler.getPoints(maxPlayerID);
         int minPlayerCoins = boardHandler.getPoints(minPlayerID);
 
         return 100 * (maxPlayerCoins - minPlayerCoins);
     }
+
+    /**
+     * Calculates an evaluation based on the difference between the maxPlayer
+     * and the minPlayers mobility score which is based on the number of possible moves of each player
+     *
+     * @return The difference between the maxPlayer and the minPlayers mobility score multiplied by 100
+     *
+     * @throws PlayerException if the player IDs are unvalid*/
 
     public int evaluateMobility() throws PlayerException {
         int maxPlayerMobility = boardHandler.getMobility(maxPlayerID);
@@ -67,6 +108,14 @@ public class Evaluator {
 
         return 100 * (maxPlayerMobility - minPlayerMobility);
     }
+
+    /**
+     * Calculates an evaluation based on the difference between the maxPlayer
+     * and the minPlayers number of captured corners
+     *
+     * @return The difference between the maxPlayer and the minPlayers number of corners multiplied by 100
+     *
+     * @throws PlayerException if the player IDs are unvalid*/
 
     public int evaluateCornerValue() throws PlayerException {
         int maxPlayerCornerValue = evaluateCornerValue(maxPlayerID);
@@ -91,6 +140,13 @@ public class Evaluator {
 
         return capturedCorners;
     }
+
+    /**
+     * Calculates an evaluation based on weights assigned to each squares of the board
+     *
+     * @return The difference between the maxPlayer and the minPlayers static weight value multiplied by 100
+     *
+     * @throws PlayerException if the player IDs are unvalid*/
 
     public int evaluateStaticWeight() throws PlayerException {
         int maxStaticWeight = evaluateStaticWeight(maxPlayerID);

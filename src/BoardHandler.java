@@ -1,4 +1,12 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Class handeling board functionality
+ *
+ * @author August Johnson Palm
+ */
 
 public class BoardHandler {
 

@@ -1,4 +1,11 @@
-import java.util.*;
+import java.util.HashMap;
+import java.util.Scanner;
+
+/**
+ * Class handling input
+ *
+ * @author August Johnson Palm
+ */
 
 public class Input {
 
