@@ -29,8 +29,10 @@ public class Input {
 
     public int nextInt() {
         String in = scanner.nextLine();
+
         try {
             return Integer.parseInt(in);
+
         } catch (NumberFormatException e) {
             return -1;
         }
@@ -38,8 +40,10 @@ public class Input {
 
     public int nextColumn() {
         String in = scanner.nextLine().toUpperCase();
+
         if (isColumnID(in))
             return columnID.get(in);
+
         return -1;
 
     }

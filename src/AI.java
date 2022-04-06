@@ -27,7 +27,7 @@ public class AI {
         this.difficulty = difficulty;
         this.minPlayerID = minPlayerID;
         this.maxPlayerID = maxPlayerID;
-        evaluator = new Evaluator(boardHandler, minPlayerID, maxPlayerID);
+        this.evaluator = new Evaluator(boardHandler, minPlayerID, maxPlayerID);
     }
 
 
@@ -36,7 +36,8 @@ public class AI {
     }
 
     public void setNextMove() throws MoveException, PlayerException {
-        searchNextOptimalMove(SEARCH_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, maxPlayerID);
+        searchNextOptimalMove(
+                SEARCH_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, maxPlayerID);
     }
 
     /**
@@ -75,7 +76,8 @@ public class AI {
                 validMoves = boardHandler.getValidMoves(maxPlayerID);
                 bestEvaluation = Integer.MIN_VALUE;
                 nextPlayer = minPlayerID;
-            } else {
+            }
+            else {
                 validMoves = boardHandler.getValidMoves(minPlayerID);
                 bestEvaluation = Integer.MAX_VALUE;
                 nextPlayer = maxPlayerID;
@@ -94,6 +96,7 @@ public class AI {
 
                 if (player == maxPlayerID) {
                     alpha = Math.max(alpha, evaluation);
+
                     if (evaluation > bestEvaluation) {
                         bestEvaluation = evaluation;
                         optimal = move;
@@ -101,6 +104,7 @@ public class AI {
 
                 } else { // min player
                     beta = Math.min(beta, evaluation);
+
                     if (evaluation < bestEvaluation) {
                         bestEvaluation = evaluation;
                         optimal = move;

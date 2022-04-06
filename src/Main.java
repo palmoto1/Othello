@@ -160,8 +160,8 @@ public class Main {
         System.out.print("AI1 score: " + boardHandler.getPoints(1) + "\n");
         System.out.print("AI2 score: " + boardHandler.getPoints(2) + "\n");
         System.out.println(boardHandler.toString());
-    }
-     */
+    }*/
+
 }
 
 

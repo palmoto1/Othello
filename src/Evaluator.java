@@ -179,6 +179,7 @@ public class Evaluator {
     }
 
 
+    //could be further optimized (could store already fully stable discs so they dont have to be checked)
     public int evaluateStability(int player) throws PlayerException {
 
         discsStableInPlaneMap = new HashMap<>();
@@ -195,29 +196,65 @@ public class Evaluator {
                 stableDiscs++;
                 continue;
             }
-            boolean horizontal = discsStableInPlaneMap.get(Plane.HORIZONTAL).contains(disc);
-            boolean vertical = discsStableInPlaneMap.get(Plane.VERTICAL).contains(disc);
-            boolean diagonalLeftDownRightUp = discsStableInPlaneMap.get(Plane.DIAGONAL_LEFT_DOWN_RIGHT_UP).contains(disc);
-            boolean diagonalLeftUpRightDown = discsStableInPlaneMap.get(Plane.DIAGONAL_LEFT_UP_RIGHT_DOWN).contains(disc);
+            boolean horizontal = discsStableInPlaneMap.
+                    get(Plane.HORIZONTAL).
+                    contains(disc);
+
+            boolean vertical = discsStableInPlaneMap.
+                    get(Plane.VERTICAL).
+                    contains(disc);
+
+            boolean diagonalLeftDownRightUp = discsStableInPlaneMap.
+                    get(Plane.DIAGONAL_LEFT_DOWN_RIGHT_UP).
+                    contains(disc);
+
+            boolean diagonalLeftUpRightDown = discsStableInPlaneMap.
+                    get(Plane.DIAGONAL_LEFT_UP_RIGHT_DOWN).
+                    contains(disc);
 
             if (!horizontal)
-                horizontal = stableInPlane(Plane.HORIZONTAL, Direction.LEFT, Direction.RIGHT, disc, player); // check left
+                horizontal = stableInPlane(
+                        Plane.HORIZONTAL,
+                        Direction.LEFT,
+                        Direction.RIGHT,
+                        disc,
+                        player
+                ); // check left
+
             if (!horizontal) continue;
 
             if (!vertical)
-                vertical = stableInPlane(Plane.VERTICAL, Direction.UP, Direction.DOWN, disc, player); // check up
+                vertical = stableInPlane(
+                        Plane.VERTICAL,
+                        Direction.UP,
+                        Direction.DOWN,
+                        disc,
+                        player
+                ); // check up
+
             if (!vertical) continue;
 
             if (!diagonalLeftDownRightUp)
-                diagonalLeftDownRightUp = stableInPlane(Plane.DIAGONAL_LEFT_DOWN_RIGHT_UP,
-                        Direction.LEFT_DOWN, Direction.RIGHT_UP, disc, player);
+                diagonalLeftDownRightUp = stableInPlane(
+                        Plane.DIAGONAL_LEFT_DOWN_RIGHT_UP,
+                        Direction.LEFT_DOWN,
+                        Direction.RIGHT_UP,
+                        disc,
+                        player
+                );
+
             if (!diagonalLeftDownRightUp) continue;
 
             if (!diagonalLeftUpRightDown)
-                diagonalLeftUpRightDown = stableInPlane(Plane.DIAGONAL_LEFT_UP_RIGHT_DOWN,
-                        Direction.LEFT_UP, Direction.RIGHT_DOWN, disc, player);
+                diagonalLeftUpRightDown = stableInPlane(
+                        Plane.DIAGONAL_LEFT_UP_RIGHT_DOWN,
+                        Direction.LEFT_UP,
+                        Direction.RIGHT_DOWN,
+                        disc,
+                        player
+                );
+
             // disc is stable in all planes then it is fully stable
-            //if (horizontal && vertical && diagonalLeftDownRightUp && diagonalLeftUpRightDown)
             if (diagonalLeftUpRightDown)
                 stableDiscs++;
 
@@ -228,13 +265,15 @@ public class Evaluator {
     }
 
     private boolean stableInPlane(Plane plane, Direction directionA, Direction directionB, Disc disc, int player) throws PlayerException {
+
         boolean setStable = false;
         boolean filledRow = false;
+
         DiscState state;
-
         ArrayList<Disc> discs = new ArrayList<>();
-
+        
         state = stableInDirection(directionA, disc, player, discs);
+
         if (state == DiscState.STABLE){
             addAdjacentDiscs(directionB, disc, player, discs);
             discsStableInPlaneMap.get(plane).addAll(discs); //need clear discs after
@@ -249,8 +288,10 @@ public class Evaluator {
 
 
         if (state == DiscState.STABLE || (state == DiscState.PENDING && filledRow)){
+
             if (state == DiscState.STABLE && !setStable && !filledRow) // if was not setStable in first direction we want to mark potential adjacent discs as setStable
                 addAdjacentDiscs(directionA, disc, player, discs);
+
             setStable = true;
             discsStableInPlaneMap.get(plane).addAll(discs);
         }
@@ -265,11 +306,14 @@ public class Evaluator {
         int j = disc.column();
 
         while (i >= 0 && i < 8 && j >= 0 && j < 8) {
+
             if (boardHandler.hasCell(i, j, player)) // collecting potential stable discs
                 discs.add(new Disc(i, j, player));
+
             else if (boardHandler.cellIsEmpty(i, j)) { // empty cell, stability is not possible
                 discs.clear();
                 return DiscState.UNSTABLE;
+
             } else //the disc is one of the opponents
                 state = DiscState.PENDING;
 
@@ -285,10 +329,13 @@ public class Evaluator {
         int j = disc.column() + direction.dy;;
 
         while (i >= 0 && i < 8 && j >= 0 && j < 8) {
+
             if (boardHandler.hasCell(i, j, player))
                 discs.add(new Disc(i, j, player));
+
             else
                 break;
+
             i += direction.dx;
             j += direction.dy;
         }

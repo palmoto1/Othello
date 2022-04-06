@@ -38,6 +38,7 @@ public class Move {
     public void setWonDiscs(List<Disc> wonDiscs) throws IllegalArgumentException {
         if (wonDiscs == null)
             throw new IllegalArgumentException();
+
         this.wonDiscs = wonDiscs;
     }
 }
