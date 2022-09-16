@@ -43,7 +43,7 @@ public class Evaluator {
      *
      * @throws PlayerException if the param is an unvalid level number*/
 
-    public int getEvaluation(int difficulty) throws PlayerException {
+    public int getEvaluation(int difficulty) throws PlayerException, MoveException {
 
         switch (difficulty) {
             case EASY:
@@ -68,7 +68,7 @@ public class Evaluator {
      *
      * @throws PlayerException if the player IDs are unvalid*/
 
-    public int evaluateStability() throws PlayerException {
+    public int evaluateStability() throws PlayerException, MoveException {
         if (allCornersCellsEmpty())
             return evaluateMobility();
 
@@ -86,7 +86,7 @@ public class Evaluator {
      *
      * @throws PlayerException if the player IDs are unvalid*/
 
-    public int evaluateParity() throws PlayerException {
+    public int evaluateParity() throws PlayerException, MoveException {
         int maxPlayerCoins = boardHandler.getPoints(maxPlayerID);
         int minPlayerCoins = boardHandler.getPoints(minPlayerID);
 
@@ -101,7 +101,7 @@ public class Evaluator {
      *
      * @throws PlayerException if the player IDs are unvalid*/
 
-    public int evaluateMobility() throws PlayerException {
+    public int evaluateMobility() throws PlayerException, MoveException {
         int maxPlayerMobility = boardHandler.getMobility(maxPlayerID);
         int minPlayerMobility = boardHandler.getMobility(minPlayerID);
 
@@ -117,7 +117,7 @@ public class Evaluator {
      *
      * @throws PlayerException if the player IDs are unvalid*/
 
-    public int evaluateCornerValue() throws PlayerException {
+    public int evaluateCornerValue() throws PlayerException, MoveException {
         int maxPlayerCornerValue = evaluateCornerValue(maxPlayerID);
         int minPlayerCornerValue = evaluateCornerValue(minPlayerID);
 
@@ -125,7 +125,7 @@ public class Evaluator {
         return 100 * (maxPlayerCornerValue - minPlayerCornerValue);
     }
 
-    public int evaluateCornerValue(int player) throws PlayerException {
+    public int evaluateCornerValue(int player) throws PlayerException, MoveException {
         int capturedCorners = 0;
 
         for (int i = 0, j = 0; j < 8; j += 7) {
@@ -148,7 +148,7 @@ public class Evaluator {
      *
      * @throws PlayerException if the player IDs are unvalid*/
 
-    public int evaluateStaticWeight() throws PlayerException {
+    public int evaluateStaticWeight() throws PlayerException, MoveException {
         int maxStaticWeight = evaluateStaticWeight(maxPlayerID);
         int minStaticWeight = evaluateStaticWeight(minPlayerID);
 
@@ -156,7 +156,7 @@ public class Evaluator {
         return 100 * (maxStaticWeight - minStaticWeight);
     }
 
-    public int evaluateStaticWeight(int player) throws PlayerException {
+    public int evaluateStaticWeight(int player) throws PlayerException, MoveException {
         int[][] staticWeights = {
                 {20, -15, 10, 10, 10, 10, -15, 20},
                 {-15, -20, -5, -5, -5, -5, -20, -15},
@@ -180,7 +180,7 @@ public class Evaluator {
 
 
     //could be further optimized (could store already fully stable discs so they dont have to be checked)
-    public int evaluateStability(int player) throws PlayerException {
+    public int evaluateStability(int player) throws PlayerException, MoveException {
 
         discsStableInPlaneMap = new HashMap<>();
 
@@ -264,14 +264,14 @@ public class Evaluator {
 
     }
 
-    private boolean stableInPlane(Plane plane, Direction directionA, Direction directionB, Disc disc, int player) throws PlayerException {
+    private boolean stableInPlane(Plane plane, Direction directionA, Direction directionB, Disc disc, int player) throws PlayerException, MoveException {
 
         boolean setStable = false;
         boolean filledRow = false;
 
         DiscState state;
         ArrayList<Disc> discs = new ArrayList<>();
-        
+
         state = stableInDirection(directionA, disc, player, discs);
 
         if (state == DiscState.STABLE){
@@ -299,7 +299,7 @@ public class Evaluator {
         return setStable;
     }
 
-    private DiscState stableInDirection(Direction direction, Disc disc, int player, List<Disc> discs) throws PlayerException {
+    private DiscState stableInDirection(Direction direction, Disc disc, int player, List<Disc> discs) throws PlayerException, MoveException {
         DiscState state = DiscState.STABLE;
 
         int i = disc.row();
@@ -323,7 +323,7 @@ public class Evaluator {
         return state;
     }
 
-    private void addAdjacentDiscs(Direction direction, Disc disc, int player, List<Disc> discs) throws PlayerException {
+    private void addAdjacentDiscs(Direction direction, Disc disc, int player, List<Disc> discs) throws PlayerException, MoveException {
 
         int i = disc.row() + direction.dx;;
         int j = disc.column() + direction.dy;;

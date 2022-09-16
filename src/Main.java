@@ -104,12 +104,12 @@ public class Main {
         return n == EASY || n == MEDIUM || n == HARD;
     }
 
-    private boolean hasWon(int player) throws PlayerException {
+    private boolean hasWon(int player) throws PlayerException, MoveException {
         int opponent = player == HUMAN_PLAYER ? COMPUTER : HUMAN_PLAYER;
         return boardHandler.getPoints(player) > boardHandler.getPoints(opponent);
     }
 
-    private void printScore() throws PlayerException {
+    private void printScore() throws PlayerException, MoveException {
         System.out.println("Your score: " + boardHandler.getPoints(HUMAN_PLAYER));
         System.out.println("Computer score: " + boardHandler.getPoints(COMPUTER));
         System.out.println(boardHandler.toString() + "\n");

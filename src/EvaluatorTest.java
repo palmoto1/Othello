@@ -88,7 +88,7 @@ public class EvaluatorTest {
 
 
     @Test
-    void testNumberOfStableDiscs() throws PlayerException {
+    void testNumberOfStableDiscs() throws PlayerException, MoveException {
         boardHandler.setBoard(DEFAULT_BOARD_1);
         assertEquals(1, evaluator.evaluateStability(1));
         boardHandler.setBoard(DEFAULT_BOARD_2);
@@ -106,7 +106,7 @@ public class EvaluatorTest {
     }
 
     @Test
-    void testEvaluateStability() throws PlayerException {
+    void testEvaluateStability() throws PlayerException, MoveException {
         boardHandler.setBoard(DEFAULT_BOARD_1);
         assertEquals(-100, evaluator.evaluateStability());
         boardHandler.setBoard(DEFAULT_BOARD_2);
@@ -120,14 +120,14 @@ public class EvaluatorTest {
     }
 
     @Test
-    void testOtherPlayerHasNoMovesWhenAllOpponentsDiscsAreStable() throws PlayerException {
+    void testOtherPlayerHasNoMovesWhenAllOpponentsDiscsAreStable() throws PlayerException, MoveException {
         boardHandler.setBoard(DEFAULT_BOARD_4);
         assertEquals(boardHandler.getPoints(1), evaluator.evaluateStability(1));
         assertEquals(0, boardHandler.getMobility(2));
     }
 
     @Test
-    void testEvaluateParity() throws PlayerException {
+    void testEvaluateParity() throws PlayerException, MoveException {
         boardHandler.setBoard(DEFAULT_BOARD_1);
         assertEquals(-600, evaluator.evaluateParity());
         boardHandler.setBoard(DEFAULT_BOARD_2);
@@ -141,7 +141,7 @@ public class EvaluatorTest {
     }
 
     @Test
-    void testEvaluateMobility() throws PlayerException {
+    void testEvaluateMobility() throws PlayerException, MoveException {
         boardHandler.setBoard(DEFAULT_BOARD_1);
         assertEquals(100, evaluator.evaluateMobility());
         boardHandler.setBoard(DEFAULT_BOARD_2);
@@ -157,7 +157,7 @@ public class EvaluatorTest {
     }
 
     @Test
-    void testEvaluateStaticWeight() throws PlayerException {
+    void testEvaluateStaticWeight() throws PlayerException, MoveException {
         boardHandler.setBoard(DEFAULT_BOARD_1);
         assertEquals(-1500, evaluator.evaluateStaticWeight());
         boardHandler.setBoard(DEFAULT_BOARD_2);
@@ -171,7 +171,7 @@ public class EvaluatorTest {
     }
 
     @Test
-    void testEvaluateCornerValue() throws PlayerException {
+    void testEvaluateCornerValue() throws PlayerException, MoveException {
         boardHandler.setBoard(DEFAULT_BOARD_1);
         assertEquals(-100, evaluator.evaluateCornerValue());
         boardHandler.setBoard(DEFAULT_BOARD_5);

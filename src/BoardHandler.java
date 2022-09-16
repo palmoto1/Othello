@@ -51,7 +51,7 @@ public class BoardHandler {
     }
 
     //could optimize by just storing the score instead
-    public int getPoints(int player) throws PlayerException {
+    public int getPoints(int player) throws PlayerException, MoveException {
         if (isValidPlayerID(player))
             return countDiscs(player);
 
@@ -59,7 +59,7 @@ public class BoardHandler {
     }
 
 
-    public List<Move> getValidMoves(int player) throws PlayerException {
+    public List<Move> getValidMoves(int player) throws PlayerException, MoveException {
         if (!isValidPlayerID(player))
             throw new PlayerException("Not a valid player ID");
 
@@ -78,11 +78,11 @@ public class BoardHandler {
         return Collections.unmodifiableList(moves);
     }
 
-    public int getMobility(int player) throws PlayerException {
+    public int getMobility(int player) throws PlayerException, MoveException {
         return getValidMoves(player).size();
     }
 
-    public boolean hasMoves(int player) throws PlayerException {
+    public boolean hasMoves(int player) throws PlayerException, MoveException {
         return getValidMoves(player).size() > 0;
     }
 
@@ -125,24 +125,23 @@ public class BoardHandler {
             currentPlayer = playerOne;
     }
 
-    public boolean hasCell(int i, int j, int player) throws PlayerException {
+    public boolean hasCell(int i, int j, int player) throws PlayerException, MoveException {
         if (!isValidPlayerID(player))
             throw new PlayerException("Not a valid player ID");
-        try {
-            return boardGrid[i][j] == player;
-        } catch (IndexOutOfBoundsException e) {
-            System.err.println("Not a valid row/column");
-            return false;
-        }
+        if (!isInsideBoard(i, j))
+            throw new MoveException("Not a valid row/column");
+
+        return boardGrid[i][j] == player;
+
     }
 
 
     // game/evaluator class
-    public boolean gameOver() throws PlayerException {
+    public boolean gameOver() throws PlayerException, MoveException {
         return !hasMoves(playerOne) && !hasMoves(playerTwo);
     }
 
-    private int countDiscs(int player) throws PlayerException {
+    private int countDiscs(int player) throws PlayerException, MoveException {
         int count = 0;
 
         for (int i = 0; i < SIZE; i++) {
@@ -154,7 +153,7 @@ public class BoardHandler {
     }
 
     //could optimize by just storing the discs instead
-    public List<Disc> getAllDiscs(int player) throws PlayerException {
+    public List<Disc> getAllDiscs(int player) throws PlayerException, MoveException {
         List<Disc> discs = new ArrayList<>();
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++)
@@ -176,7 +175,7 @@ public class BoardHandler {
         return isInsideBoard(i, j) && cellIsEmpty(i, j);
     }
 
-    private List<Disc> searchForWonDiscs(Direction direction, int i, int j, int player) throws PlayerException {
+    private List<Disc> searchForWonDiscs(Direction direction, int i, int j, int player) throws PlayerException, MoveException {
         int opponent = player == playerTwo ? playerOne : playerTwo;
 
         List<Disc> discs = new ArrayList<>();
@@ -207,7 +206,7 @@ public class BoardHandler {
     }
 
 
-    private List<Disc> wonDiscs(int i, int j, int player) throws PlayerException {
+    private List<Disc> wonDiscs(int i, int j, int player) throws PlayerException, MoveException {
 
         List<Disc> discs = new ArrayList<>();
 
